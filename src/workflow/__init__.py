@@ -1,4 +1,4 @@
 # workflow package
 """
-GeoLeap workflow: DAG build/manage, cacheable subgraph extraction, interceptors.
+GeoLeap declared workflows, cache records, matching, planning and residency.
 """

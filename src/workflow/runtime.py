@@ -10,8 +10,11 @@ from __future__ import annotations
 import json
 import hashlib
 import math
+from contextlib import nullcontext
+import sys
 import time
 import uuid
+import weakref
 from bisect import bisect_right
 from collections import Counter, deque
 from dataclasses import dataclass, field, replace
@@ -23,6 +26,7 @@ from .records import CacheSnapshot, CachedRecord, RecordStore
 from .reliability import Matcher, ReliabilityConfig, ReliabilityTable, ScreeningMode
 from .residency import AdmissionResult, OpportunityCacheManager, ResidencyConfig
 from .spec import SubgraphSpec, WorkflowSpec, accepts_schema, canonical_json
+from .memory import CacheMemoryBudget, CacheMemoryError, measure_object_graph
 
 
 @dataclass(frozen=True)
@@ -36,12 +40,16 @@ class RuntimeConfig:
     screening_budget: Optional[float] = None
     feedback_on_normal_execution: bool = False
     fixed_cache: bool = False
+    cache_heap_limit_bytes: Optional[int] = None
 
     def __post_init__(self):
         if not self.epoch or self.audit_top_k < 1 or self.request_window < 1 or self.metadata_capacity < 0:
             raise ValueError("Invalid runtime epoch or bounded resource configuration")
         if self.screening_budget is not None and (not math.isfinite(self.screening_budget) or self.screening_budget < 0):
             raise ValueError("Screening budget must be finite and nonnegative")
+        if self.cache_heap_limit_bytes is not None and (isinstance(self.cache_heap_limit_bytes, bool)
+                or not isinstance(self.cache_heap_limit_bytes, int) or self.cache_heap_limit_bytes < 0):
+            raise ValueError("cache_heap_limit_bytes must be a nonnegative integer or None")
 
 
 @dataclass
@@ -60,6 +68,7 @@ class RuntimeResult:
     execution_purpose: str = "serving"
     planning_elapsed_ms: float = 0.0
     served_hits: list = field(default_factory=list)
+    cache_telemetry_accounting: str = "ordinary_request_output"
 
 
 class GeoLeapRuntime:
@@ -74,6 +83,8 @@ class GeoLeapRuntime:
         agreement: Optional[Callable[[SubgraphSpec, Mapping[str, Any], Mapping[str, Any]], float]] = None,
         operation_observer: Optional[Callable[[dict], None]] = None,
         hit_observer: Optional[Callable[[dict], None]] = None,
+        cache_memory_budget: Optional[CacheMemoryBudget] = None,
+        input_encoder_id: str = "char3gram-sha256-128-v1",
     ):
         self.workflow = workflow
         self.subgraphs = tuple(subgraphs)
@@ -81,10 +92,20 @@ class GeoLeapRuntime:
         if len({spec.identity for spec in self.subgraphs}) != len(self.subgraphs):
             raise ValueError("Subgraph identities must be unique")
         for spec in self.subgraphs:
-            expected = workflow.subgraph(spec.name, spec.node_ids, spec.critical_fields)
+            expected = workflow.subgraph(spec.name, spec.node_ids, spec.critical_fields, similarity_fields=spec.similarity_fields)
             if expected != spec:
                 raise ValueError("Subgraph declaration does not match this workflow")
-        self.store = store if store is not None else RecordStore()
+        if (cache_memory_budget is not None and self.config.cache_heap_limit_bytes is not None
+                and cache_memory_budget.limit_bytes != self.config.cache_heap_limit_bytes):
+            raise ValueError("Injected global heap budget and runtime limit disagree")
+        self.cache_memory_budget = cache_memory_budget
+        if self.cache_memory_budget is None and self.config.cache_heap_limit_bytes is not None:
+            self.cache_memory_budget = CacheMemoryBudget(self.config.cache_heap_limit_bytes)
+        self.store = store if store is not None else RecordStore(self.cache_memory_budget)
+        if self.cache_memory_budget is None:
+            self.cache_memory_budget = self.store.memory_budget
+        elif self.store.memory_budget is not self.cache_memory_budget:
+            self.store.bind_memory_budget(self.cache_memory_budget)
         if reliability_table is not None:
             if not isinstance(reliability_table, ReliabilityTable):
                 raise ValueError("reliability_table must be a ReliabilityTable")
@@ -95,7 +116,7 @@ class GeoLeapRuntime:
         else:
             self.reliability = ReliabilityTable(reliability_config)
         self.matcher = Matcher(self.reliability, sim_threshold=self.config.similarity_threshold,
-                               allow_exact=self.config.allow_exact)
+                               allow_exact=self.config.allow_exact, input_encoder_id=input_encoder_id)
         if self.matcher.config.screening_mode == ScreeningMode.SIMILARITY and self.config.screening_budget is not None:
             raise ValueError("Similarity screening has no empirical score; screening_budget must be None")
         self.forecasts = ForecastTable()
@@ -125,6 +146,106 @@ class GeoLeapRuntime:
         self._audit_profile_cost = 0.0
         self._fixed_cache_snapshot = self.store.snapshot(include_audit=True) if self.config.fixed_cache else None
         self._fixed_planning_fingerprint = None
+        self._cache_memory_workspace = None
+        self._retained_memory_results = weakref.WeakValueDictionary()
+        self._cache_memory_handle = None
+        self._cache_pressure_counts = Counter({key: 0 for key in
+            ("record_capture", "metadata_write", "evidence_reset", "maintenance_profiles", "snapshot", "telemetry")})
+        if self.cache_memory_budget is not None:
+            self.reliability.bind_memory_budget(self.cache_memory_budget)
+            self.forecasts.bind_memory_budget(self.cache_memory_budget)
+            self.planner.bind_memory_budget(self.cache_memory_budget)
+            self._maintenance_planner.bind_memory_budget(self.cache_memory_budget)
+            self._cache_memory_handle = self.cache_memory_budget.register_root(
+                "runtime:" + str(id(self)), self._cache_memory_roots, category="runtime_cache_control")
+
+    def _cache_memory_roots(self):
+        # The entire runtime control graph is conservatively included (also its
+        # fixed workflow descriptors). Opaque callables/native storage remain
+        # explicitly outside Python heap introspection, and OS scope is separate.
+        return (self,
+                tuple((result.trace, result.served_hits) for result in self._retained_memory_results.values()),
+                )
+
+    def cache_memory_snapshot(self) -> dict:
+        """Shared cache-owned Python allocation ledger, separate from OS/RSS."""
+        return dict(self.store.memory_snapshot(), cache_pressure_counts=dict(self._cache_pressure_counts))
+
+    def _cache_memory_guard(self):
+        return self.cache_memory_budget.transaction() if self.cache_memory_budget is not None else nullcontext()
+
+    def _enqueue_completed_record(self, spec, inputs, outputs):
+        if self.cache_memory_budget is None:
+            record = CachedRecord.create(spec, inputs, outputs, self.config.epoch,
+                                         metadata_capacity=self.config.metadata_capacity,
+                                         embedding_encoder=self.matcher.input_encoder_id)
+            return record.record_id if self.manager.enqueue(record, audit_only=True) else None
+        source_bytes = measure_object_graph({"inputs": inputs, "outputs": outputs})["owned_heap_bytes"]
+        # Cover canonical text, encoder/parser temporaries and the staged
+        # record before ownership moves to manager pending roots.
+        scratch = 65536 + source_bytes * 16 + self.config.metadata_capacity
+        record = None
+        try:
+            with self._cache_memory_guard(), self.cache_memory_budget.reservation(scratch, "record_capture") as token:
+                record = CachedRecord.create(spec, inputs, outputs, self.config.epoch,
+                                             metadata_capacity=self.config.metadata_capacity,
+                                             embedding_encoder=self.matcher.input_encoder_id)
+                self._cache_memory_workspace = (record, inputs, outputs)
+                if not self.manager.enqueue(record, audit_only=True):
+                    return None
+                token.commit()
+                return record.record_id
+        except CacheMemoryError:
+            if record is not None:
+                self.manager.cancel_pending(record.record_id)
+            self._cache_pressure_counts["record_capture"] += 1
+            return None
+        finally:
+            record = None
+            self._cache_memory_workspace = None
+
+    def _remember_request(self, request_id, demand_context, trace):
+        if self.cache_memory_budget is None:
+            self._request_window.append({"request_id": request_id, "epoch": self.config.epoch,
+                                         "demand_context": demand_context})
+            return
+        old = self._request_window
+        reserve = measure_object_graph({"old": old})["owned_heap_bytes"] + 4 * len(request_id) + 4096
+        try:
+            with self._cache_memory_guard(), self.cache_memory_budget.reservation(reserve, "demand_window") as token:
+                updated = deque(old, maxlen=old.maxlen)
+                self._cache_memory_workspace = (old, updated)
+                updated.append({"request_id": request_id, "epoch": self.config.epoch,
+                                "demand_context": demand_context})
+                self._request_window = updated
+                token.commit()
+        except CacheMemoryError:
+            self._request_window = old
+            trace.append({"event": "demand_window_update_rejected", "reason": "memory_budget_exhausted"})
+        finally:
+            old = updated = None
+            self._cache_memory_workspace = None
+
+    def _eligible_at_frontier(self, ready, completed, state, snapshot, allowance):
+        def select():
+            result = []
+            for spec in self.subgraphs:
+                if spec.entry_node_id in ready and not set(spec.node_ids) & completed:
+                    descriptors = self.matcher.eligible(spec, state, snapshot, self.config.epoch,
+                                                        allow_exact=self.config.allow_exact)
+                    result.extend(item for item in descriptors if allowance is None or (
+                        item.score is not None and item.score <= allowance))
+            return result
+        if self.cache_memory_budget is None:
+            return select()
+        largest = max((len(record.input_json) + len(record.output_json) for record in snapshot.records), default=0)
+        source = measure_object_graph({"state": state})["owned_heap_bytes"]
+        scratch = 65536 + largest * 32 + source * 4 + len(snapshot.records) * 1024
+        with self._cache_memory_guard(), self.cache_memory_budget.reservation(scratch, "lookup") as token:
+            selected = select()
+            self._cache_memory_workspace = (selected, snapshot)
+            token.commit()
+            return selected
 
     def _check_fixed_planning_state(self) -> None:
         if not self.config.fixed_cache:
@@ -190,7 +311,28 @@ class GeoLeapRuntime:
         observed = {item.get("demand_context") for item in self._request_window} - {None}
         if not observed.issubset(profiles):
             raise ValueError("Demand profiles must retain contexts still present in the observed window")
-        self._demand_profiles = {key: table.snapshot() for key, table in profiles.items()}
+        if self.cache_memory_budget is None:
+            self._demand_profiles = {key: table.snapshot() for key, table in profiles.items()}
+            return
+        old = self._demand_profiles
+        source = measure_object_graph({"profiles": profiles})["owned_heap_bytes"]
+        try:
+            with self._cache_memory_guard(), self.cache_memory_budget.reservation(
+                    65536 + source * 4, "demand_profiles") as token:
+                updated = {}
+                self._cache_memory_workspace = (old, updated)
+                for key, table in profiles.items():
+                    copied = table.snapshot()
+                    copied.bind_memory_budget(self.cache_memory_budget)
+                    updated[key] = copied
+                self._demand_profiles = updated
+                token.commit()
+        except BaseException:
+            self._demand_profiles = old
+            raise
+        finally:
+            old = updated = copied = None
+            self._cache_memory_workspace = None
 
     def residency_demand_snapshot(self) -> dict:
         counts = Counter(item.get("demand_context") for item in self._request_window)
@@ -221,7 +363,7 @@ class GeoLeapRuntime:
         operators = tuple(replace(operator, **updates[operator.node_id])
                           if operator.node_id in updates else operator for operator in self.workflow.operators)
         updated = WorkflowSpec(self.workflow.workflow_id, operators, version=self.workflow.version)
-        if any(updated.subgraph(spec.name, spec.node_ids, spec.critical_fields) != spec for spec in self.subgraphs):
+        if any(updated.subgraph(spec.name, spec.node_ids, spec.critical_fields, similarity_fields=spec.similarity_fields) != spec for spec in self.subgraphs):
             raise ValueError("Economic profile update unexpectedly changes a subgraph identity")
         self.workflow = updated
         self._cost_profile_revision += 1
@@ -280,21 +422,47 @@ class GeoLeapRuntime:
     def _refresh_and_profile(self, observations):
         self.reliability.refresh()
         for spec, record, inputs in observations:
-            snapshot = CacheSnapshot(self.store.version, (record,))
-            # Audit-only records can be screened for graduation explicitly. They
-            # are never exposed by the actual serving snapshot in run().
-            supported = bool(self.matcher.eligible(spec, inputs, snapshot, self.config.epoch, allow_exact=False))
-            self.forecasts.observe(spec.identity, record.record_id, record.revision, self.config.epoch, supported)
-            payload = canonical_json({
-                "reliability": json.loads(self.reliability.export_record(record.record_id)),
-                "forecasts": json.loads(self.forecasts.export_record(record.record_id)),
-            }).encode("utf-8")
-            if not self.store.write_metadata(record.record_id, payload):
-                # Fail closed instead of keeping support outside its allocation.
-                other_ids = {item.record_id for item in self.store.snapshot(include_audit=True).records
-                             if item.record_id != record.record_id}
-                self.reliability.discard_records(other_ids)
-                self.forecasts.discard_records(other_ids)
+            if self.cache_memory_budget is not None:
+                chars = len(record.input_json) + len(record.output_json)
+                scratch = 32768 + 128 * chars + record.metadata_capacity * 8
+                try:
+                    with self._cache_memory_guard(), self.cache_memory_budget.reservation(scratch, "metadata_profile") as token:
+                        self._refresh_record_profile(spec, record, inputs)
+                        token.commit()
+                except CacheMemoryError:
+                    self._cache_pressure_counts["metadata_write"] += 1
+                    self.reliability.fail_closed_clear()
+                    self.forecasts.fail_closed_clear()
+                    self._cache_pressure_counts["evidence_reset"] += 1
+                finally:
+                    self._cache_memory_workspace = None
+            else:
+                self._refresh_record_profile(spec, record, inputs)
+
+    def _refresh_record_profile(self, spec, record, inputs):
+        snapshot = CacheSnapshot(self.store.version, (record,))
+        # Audit-only records can be screened for graduation explicitly. They
+        # are never exposed by the actual serving snapshot in run().
+        supported = bool(self.matcher.eligible(spec, inputs, snapshot, self.config.epoch, allow_exact=False))
+        self.forecasts.observe(spec.identity, record.record_id, record.revision, self.config.epoch, supported)
+        payload = canonical_json({
+            "reliability": json.loads(self.reliability.export_record(record.record_id)),
+            "forecasts": json.loads(self.forecasts.export_record(record.record_id)),
+        }).encode("utf-8")
+        if self.cache_memory_budget is not None:
+            self._cache_memory_workspace = payload
+        if not self.store.write_metadata(record.record_id, payload):
+            # Fail closed instead of keeping support outside its allocation.
+            other_ids = {item.record_id for item in self.store.snapshot(include_audit=True).records
+                         if item.record_id != record.record_id}
+            reliability_cleaned = self.reliability.discard_records(other_ids)
+            forecasts_cleaned = self.forecasts.discard_records(other_ids)
+            if self.cache_memory_budget is not None:
+                if reliability_cleaned is False:
+                    self.reliability.fail_closed_clear()
+                if forecasts_cleaned is False:
+                    self.forecasts.fail_closed_clear()
+                self._cache_pressure_counts["metadata_write"] += 1
 
     def _has_support(self, spec: SubgraphSpec, record: CachedRecord) -> bool:
         if record.epoch != self.config.epoch:
@@ -393,6 +561,53 @@ class GeoLeapRuntime:
             audit_selector: Optional[Callable[[dict], bool]] = None,
             audit_probability: Optional[float] = None,
             demand_context: Optional[str] = None) -> RuntimeResult:
+        options = dict(request_id=request_id, use_cache=use_cache, collect_records=collect_records,
+                       audit_hits=audit_hits, collect_feedback=collect_feedback, execution_purpose=execution_purpose,
+                       audit_selector=audit_selector, audit_probability=audit_probability, demand_context=demand_context)
+        budget = self.cache_memory_budget
+        if budget is None or self.planner.config.mode == PlanningMode.NO_CACHE:
+            return self._run_impl(initial_state, **options)
+        nodes = len(self.workflow.nodes)
+        largest = max((len(record.input_json) + len(record.output_json) for record in self.store._records.values()), default=0)
+        trace_room = 65536 + nodes * (self.planner.config.scenario_limit * (1024 + 256 * nodes) + 16 * largest)
+        try:
+            token = budget.acquire_reservation(trace_room, "request_cache_telemetry")
+        except CacheMemoryError:
+            self._cache_pressure_counts["telemetry"] += 1
+            return self._run_impl(initial_state, **options, _cache_bypass_reason="telemetry_reservation_rejected")
+        result = None
+        try:
+            result = self._run_impl(initial_state, **options)
+            try:
+                with budget.transaction():
+                    self._retained_memory_results[id(result)] = result
+                    token.commit()
+                result.cache_telemetry_accounting = "shared_cache_heap_until_reader_release"
+            except CacheMemoryError:
+                # The answer is already available. Transfer its detached
+                # diagnostics to the caller as request output; never rerun paid
+                # operators or retain an over-budget internal telemetry copy.
+                with budget.transaction():
+                    self._retained_memory_results.pop(id(result), None)
+                self._cache_pressure_counts["telemetry"] += 1
+                result.cache_telemetry_accounting = "caller_owned_after_cache_budget_rejection"
+                result.trace.append({"event": "cache_telemetry_transferred_to_caller",
+                                     "reason": "memory_budget_exhausted",
+                                     "scope": "ordinary request output outside resident cache heap"})
+            return result
+        except BaseException:
+            if result is not None:
+                self._retained_memory_results.pop(id(result), None)
+            raise
+        finally:
+            token.release(check=sys.exc_info()[0] is None)
+
+    def _run_impl(self, initial_state: Mapping[str, Any], *, request_id: Optional[str] = None,
+            use_cache: bool = True, collect_records: bool = True, audit_hits: bool = False,
+            collect_feedback: Optional[bool] = None, execution_purpose: str = "serving",
+            audit_selector: Optional[Callable[[dict], bool]] = None,
+            audit_probability: Optional[float] = None,
+            demand_context: Optional[str] = None, _cache_bypass_reason: Optional[str] = None) -> RuntimeResult:
         if self._running:
             raise RuntimeError("This incremental executor supports one request at a time")
         self._running = True
@@ -405,8 +620,11 @@ class GeoLeapRuntime:
                 if collect_feedback is True or audit_hits or audit_selector is not None:
                     raise ValueError("C1 fixed-state execution disables audits and feedback updates")
                 collect_records, collect_feedback = False, False
-                if not no_cache:
-                    self._check_fixed_planning_state()
+                if not no_cache and _cache_bypass_reason is None:
+                    try:
+                        self._check_fixed_planning_state()
+                    except CacheMemoryError:
+                        _cache_bypass_reason = "fixed_snapshot_rejected"
             if execution_purpose not in ("serving", "extra_audit", "baseline_measurement"):
                 raise ValueError("Unknown execution purpose")
             if audit_probability is not None and not 0 <= audit_probability <= 1:
@@ -421,11 +639,24 @@ class GeoLeapRuntime:
             self._active_request_id, self._active_execution_purpose = request_id, execution_purpose
             if no_cache:
                 return self._run_without_cache(state, request_id, execution_purpose, started)
-            if execution_purpose == "serving" and not self.config.fixed_cache:
-                self.manager.advance_request()
-            active_planner = (LookaheadPlanner(self.planner.config, self._demand_profiles[demand_context].snapshot())
-                              if demand_context is not None else self.planner)
-            pre_request_snapshot = self.store.snapshot(include_audit=True)
+            if _cache_bypass_reason is not None:
+                result = self._run_without_cache(state, request_id, execution_purpose, started)
+                result.trace.append({"event": "cache_planning_bypassed", "reason": "memory_budget_exhausted",
+                                     "stage": _cache_bypass_reason, "configured_planning_mode": self.planner.config.mode.value})
+                return result
+            try:
+                if execution_purpose == "serving" and not self.config.fixed_cache:
+                    self.manager.advance_request()
+                active_planner = (LookaheadPlanner(self.planner.config, self._demand_profiles[demand_context].snapshot())
+                                  if demand_context is not None else self.planner)
+                pre_request_snapshot = self.store.snapshot(include_audit=True)
+            except CacheMemoryError:
+                if execution_purpose != "serving":
+                    raise  # No paid reference operation has started.
+                result = self._run_without_cache(state, request_id, execution_purpose, started)
+                result.trace.append({"event": "cache_planning_bypassed", "reason": "memory_budget_exhausted",
+                                     "stage": "request_snapshot", "configured_planning_mode": self.planner.config.mode.value})
+                return result
             feedback_enabled = self.config.feedback_on_normal_execution if collect_feedback is None else collect_feedback
             completed, normally_executed = set(), set()
             executed, reused = [], []
@@ -453,23 +684,38 @@ class GeoLeapRuntime:
                 for spec in self.subgraphs:
                     if spec.entry_node_id in ready and spec.identity not in captured_inputs:
                         captured_inputs[spec.identity] = spec.project(state)
-                snapshot = self.store.snapshot()
-                self._check_fixed_planning_state()
+                snapshot_ok = True
+                try:
+                    snapshot = self.store.snapshot()
+                except CacheMemoryError:
+                    snapshot_ok = False
+                    snapshot = CacheSnapshot(self.store.version)
+                    trace.append({"event": "cache_planning_bypassed", "reason": "memory_budget_exhausted", "stage": "frontier_snapshot"})
+                try:
+                    self._check_fixed_planning_state()
+                except CacheMemoryError:
+                    snapshot_ok = False
+                    trace.append({"event": "cache_planning_bypassed", "reason": "memory_budget_exhausted",
+                                  "stage": "fixed_state_check"})
                 eligible = []
-                if use_cache:
-                    for spec in self.subgraphs:
-                        if spec.entry_node_id in ready and not set(spec.node_ids) & completed:
-                            descriptors = self.matcher.eligible(spec, state, snapshot, self.config.epoch,
-                                                                allow_exact=self.config.allow_exact)
-                            eligible.extend(item for item in descriptors if allowance is None or (
-                                item.score is not None and item.score <= allowance))
+                if use_cache and snapshot_ok:
                     plan_started = time.perf_counter()
-                    decision = active_planner.choose(self.workflow, self.subgraphs, completed, state,
-                                                      snapshot, eligible, self.config.epoch)
+                    try:
+                        eligible = self._eligible_at_frontier(ready, completed, state, snapshot, allowance)
+                        decision = active_planner.choose(self.workflow, self.subgraphs, completed, state,
+                                                          snapshot, eligible, self.config.epoch)
+                    except CacheMemoryError:
+                        # Cache pressure must not fabricate an output or stop a
+                        # legal original operator. Bypass reuse for this step.
+                        decision = None
+                        trace.append({"event": "cache_planning_bypassed", "reason": "memory_budget_exhausted"})
+                    finally:
+                        self._cache_memory_workspace = None
                     planning_ms = (time.perf_counter() - plan_started) * 1000
                     planning_elapsed_ms += planning_ms
-                    action = decision.action
-                    trace.append({"event": "plan", "snapshot_version": snapshot.version,
+                    action = decision.action if decision is not None else None
+                    if decision is not None:
+                        trace.append({"event": "plan", "snapshot_version": snapshot.version,
                                   "objective": decision.objective, "details": dict(decision.trace),
                                   "screening_mode": screening.screening_mode.value,
                                   "planning_mode": self.planner.config.mode.value,
@@ -586,7 +832,11 @@ class GeoLeapRuntime:
             if hit_observations:
                 self._refresh_and_profile(hit_observations)
             reference_outputs, new_ids = {}, []
-            existing = self.store.snapshot(include_audit=True).records
+            try:
+                existing = self.store.snapshot(include_audit=True).records
+            except CacheMemoryError:
+                existing, collect_records = (), False
+                trace.append({"event": "record_capture_skipped", "reason": "memory_budget_exhausted"})
             for spec in self.subgraphs:
                 if not set(spec.node_ids).issubset(normally_executed):
                     continue  # An internally substituted region is never a fresh reference record.
@@ -598,15 +848,14 @@ class GeoLeapRuntime:
                     record.input_json == canonical_json(inputs) and record.output_json == canonical_json(outputs)
                     for record in existing
                 ):
-                    record = CachedRecord.create(spec, inputs, outputs, self.config.epoch,
-                                                 metadata_capacity=self.config.metadata_capacity)
-                    if self.manager.enqueue(record, audit_only=True):
-                        new_ids.append(record.record_id)
+                    record_id = self._enqueue_completed_record(spec, inputs, outputs)
+                    if record_id is not None:
+                        new_ids.append(record_id)
                     else:
-                        trace.append({"event": "audit_admission_queue_full", "subgraph": spec.name})
+                        trace.append({"event": "audit_admission_queue_full", "subgraph": spec.name,
+                                      "reason": "queue_count_or_heap_limit" if self.cache_memory_budget is not None else "queue_limit"})
             if execution_purpose == "serving":
-                self._request_window.append({"request_id": request_id, "epoch": self.config.epoch,
-                                             "demand_context": demand_context})
+                self._remember_request(request_id, demand_context, trace)
             result = RuntimeResult(request_id, state, tuple(executed), tuple(reused), tuple(new_ids),
                                    (time.perf_counter() - started) * 1000, cost + audit_cost,
                                    cost + audit_cost if execution_purpose == "extra_audit" else audit_cost,
@@ -615,7 +864,10 @@ class GeoLeapRuntime:
             if feedback_enabled:
                 self.observe_reference_result(result, pre_request_snapshot)
             result.elapsed_ms = (time.perf_counter() - started) * 1000
-            self._check_fixed_planning_state()
+            try:
+                self._check_fixed_planning_state()
+            except CacheMemoryError:
+                trace.append({"event": "fixed_state_check_incomplete", "reason": "memory_budget_exhausted"})
             return result
         finally:
             self._running = False
@@ -681,6 +933,68 @@ class GeoLeapRuntime:
                     maintenance_scope="runtime round including manager; do not add nested manager time")
 
     def _maintenance_round(self, now: Optional[float]) -> list:
+        if self.cache_memory_budget is None:
+            self._freeze_maintenance_planners()
+        else:
+            old = (self._maintenance_planner, self._maintenance_context_counts,
+                   self._maintenance_context_planners, self._window_weight)
+            source = measure_object_graph({"forecasts": self.forecasts, "profiles": self._demand_profiles})["owned_heap_bytes"]
+            try:
+                with self._cache_memory_guard(), self.cache_memory_budget.reservation(
+                        65536 + source * 4, "maintenance_profiles") as token:
+                    self._cache_memory_workspace = old
+                    self._freeze_maintenance_planners()
+                    token.commit()
+            except CacheMemoryError:
+                (self._maintenance_planner, self._maintenance_context_counts,
+                 self._maintenance_context_planners, self._window_weight) = old
+                self._cache_pressure_counts["maintenance_profiles"] += 1
+                # Pressure cleanup must remain reachable even when cloning the
+                # D model cannot fit. Do not drain/admit using stale forecasts.
+                expired = self.manager.expire_audits_only(now=now)
+                if expired is not None and expired.accepted:
+                    self.reliability.fail_closed_clear()
+                    self.forecasts.fail_closed_clear()
+                    self._cache_pressure_counts["evidence_reset"] += 1
+                rejected = AdmissionResult(False, "memory_budget_exhausted", byte_size=self.store.byte_size)
+                return ([expired] if expired is not None else []) + [rejected]
+            finally:
+                old = None
+                self._cache_memory_workspace = None
+        results = self.manager.maintenance_tick(now=now)
+        try:
+            snapshot = self.store.snapshot(include_audit=True)
+        except CacheMemoryError:
+            # Admission may already have committed. Keep those receipts and
+            # invalidate optional evidence rather than losing the round result.
+            self.reliability.fail_closed_clear()
+            self.forecasts.fail_closed_clear()
+            self._cache_pressure_counts["snapshot"] += 1
+            return results + [AdmissionResult(False, "memory_budget_exhausted", byte_size=self.store.byte_size)]
+        specs = {spec.identity: spec for spec in self.subgraphs}
+        for record in snapshot.records:
+            if record.record_id not in snapshot.audit_ids or record.subgraph_id not in specs:
+                continue
+            spec = specs[record.subgraph_id]
+            if self._has_support(spec, record):
+                results.append(self.manager.promote(record.record_id))
+        try:
+            live_ids = {record.record_id for record in self.store.snapshot(include_audit=True).records}
+        except CacheMemoryError:
+            self.reliability.fail_closed_clear()
+            self.forecasts.fail_closed_clear()
+            self._cache_pressure_counts["snapshot"] += 1
+            return results + [AdmissionResult(False, "memory_budget_exhausted", byte_size=self.store.byte_size)]
+        reliability_cleaned = self.reliability.discard_records(live_ids)
+        forecasts_cleaned = self.forecasts.discard_records(live_ids)
+        if self.cache_memory_budget is not None:
+            if reliability_cleaned is False:
+                self.reliability.fail_closed_clear()
+            if forecasts_cleaned is False:
+                self.forecasts.fail_closed_clear()
+        return results
+
+    def _freeze_maintenance_planners(self):
         self._maintenance_planner = LookaheadPlanner(self.planner.config, self.forecasts.snapshot())
         current = self.store.snapshot(include_audit=True)
         declared = {spec.identity: spec for spec in self.subgraphs}
@@ -702,18 +1016,3 @@ class GeoLeapRuntime:
             planner.forecasts.discard_records(supported_ids)
             self._maintenance_context_planners[context] = planner
         self._window_weight = len(self._request_window)
-        results = self.manager.maintenance_tick(now=now)
-        snapshot = self.store.snapshot(include_audit=True)
-        specs = {spec.identity: spec for spec in self.subgraphs}
-        for record in snapshot.records:
-            if record.record_id not in snapshot.audit_ids or record.subgraph_id not in specs:
-                continue
-            spec = specs[record.subgraph_id]
-            # Support can be in a non-exact similarity bin. Graduation requires
-            # at least one supported bin; serving still checks the actual bin.
-            if self._has_support(spec, record):
-                results.append(self.manager.promote(record.record_id))
-        live_ids = {record.record_id for record in self.store.snapshot(include_audit=True).records}
-        self.reliability.discard_records(live_ids)
-        self.forecasts.discard_records(live_ids)
-        return results

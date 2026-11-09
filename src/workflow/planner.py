@@ -14,11 +14,14 @@ import itertools
 import math
 import threading
 import time
+import uuid
+import weakref
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, Iterable, Mapping, Optional, Sequence, Tuple, TYPE_CHECKING
 
 from .records import CacheSnapshot, CachedRecord
+from .memory import CacheMemoryBudget, CacheMemoryError, measure_object_graph
 from .spec import SubgraphSpec, WorkflowSpec, canonical_json
 from .scheduling import ScheduleTask, schedule_tasks
 
@@ -140,16 +143,74 @@ class ForecastTable:
     def __init__(self) -> None:
         self._counts: Dict[ForecastKey, Tuple[int, int]] = {}
         self._lock = threading.RLock()
+        self.memory_budget = None
+        self._memory_prefix = "forecasts:" + uuid.uuid4().hex
+        self._memory_handle = None
+        self._memory_finalizer = None
+        self._pending_workspace = None
+
+    def _memory_root(self):
+        return self
+
+    def bind_memory_budget(self, budget: CacheMemoryBudget) -> None:
+        """Measure this table and its COW workspaces in one shared heap domain."""
+        if self.memory_budget is budget:
+            return
+        if self.memory_budget is not None:
+            raise ValueError("A forecast table cannot change its memory budget domain")
+        if not isinstance(budget, CacheMemoryBudget):
+            raise TypeError("budget must be a CacheMemoryBudget")
+        with budget.transaction(), self._lock:
+            handle = None
+            try:
+                self.memory_budget = budget
+                handle = budget.register_root(self._memory_prefix, self._memory_root, category="forecasts")
+                self._memory_handle = handle
+                self._memory_finalizer = weakref.finalize(self, handle.close)
+                budget.check()
+            except BaseException:
+                if self._memory_finalizer is not None:
+                    self._memory_finalizer.detach()
+                self._memory_handle = self._memory_finalizer = None
+                self.memory_budget = None
+                if handle is not None:
+                    handle.close()
+                raise
+
+    def _heap_reservation_bytes(self, key=None):
+        current = measure_object_graph({"counts": self._counts})["owned_heap_bytes"]
+        incoming = measure_object_graph({"key": key})["owned_heap_bytes"] if key is not None else 0
+        return 16384 + 2 * current + 2 * incoming
 
     def observe(
         self, identity: str, record_id: str, revision: int, epoch: str, passed: bool
-    ) -> None:
+    ) -> bool:
         if not isinstance(passed, bool):
             raise TypeError("passed must be a bool")
         key = (identity, record_id, revision, epoch)
+        if self.memory_budget is not None:
+            budget = self.memory_budget
+            with budget.transaction(), self._lock:
+                old = self._counts
+                try:
+                    with budget.reservation(self._heap_reservation_bytes(key), "forecast_observe") as token:
+                        self._pending_workspace = {"old": old, "key": key}
+                        prospective = dict(old)
+                        self._pending_workspace["new"] = prospective
+                        successes, total = old.get(key, (0, 0))
+                        prospective[key] = (successes + int(passed), total + 1)
+                        self._counts = prospective
+                        token.commit()
+                    return True
+                except MemoryError:
+                    self._counts = old
+                    return False
+                finally:
+                    self._pending_workspace = None
         with self._lock:
             successes, total = self._counts.get(key, (0, 0))
             self._counts[key] = (successes + int(passed), total + 1)
+        return True
 
     def probability(self, spec: SubgraphSpec, record: CachedRecord, epoch: str) -> float:
         with self._lock:
@@ -159,6 +220,31 @@ class ForecastTable:
         return successes / total if total else 0.0
 
     def snapshot(self) -> "ForecastTable":
+        if self.memory_budget is not None:
+            budget = self.memory_budget
+            with budget.transaction(), self._lock:
+                result = None
+                try:
+                    with budget.reservation(self._heap_reservation_bytes(), "forecast_snapshot") as token:
+                        self._pending_workspace = {"old": self._counts}
+                        result = ForecastTable()
+                        self._pending_workspace["copy"] = result
+                        result._counts = self._counts.copy()
+                        token.commit()
+                        result.bind_memory_budget(budget)
+                    return result
+                except BaseException:
+                    # Failure tracebacks may outlive the call. Do not leave a
+                    # discarded, unreturned counter copy hidden in that frame.
+                    self._pending_workspace = None
+                    if result is not None:
+                        result._counts = {}
+                        if result._memory_finalizer is not None:
+                            result._memory_finalizer()
+                        result.memory_budget = None
+                    raise
+                finally:
+                    self._pending_workspace = None
         result = ForecastTable()
         with self._lock:
             result._counts = self._counts.copy()
@@ -184,9 +270,48 @@ class ForecastTable:
         it is live.  Keeping only live IDs therefore bounds the normal runtime
         profile table to its allocated record set; snapshots remain independent.
         """
+        if self.memory_budget is not None:
+            budget = self.memory_budget
+            with budget.transaction(), self._lock:
+                old = self._counts
+                try:
+                    with budget.reservation(self._heap_reservation_bytes(), "forecast_discard") as token:
+                        work = {"old": old}
+                        self._pending_workspace = work
+                        known = {key[1] for key in old}
+                        live = {identity for identity in live_ids if identity in known}
+                        work["sets"] = (known, live)
+                        prospective = {key: counts for key, counts in old.items() if key[1] in live}
+                        work["new"] = prospective
+                        self._counts = prospective
+                        token.commit()
+                    return True
+                except MemoryError:
+                    self._counts = old
+                    return False
+                finally:
+                    self._pending_workspace = None
         live = set(live_ids)
         with self._lock:
             self._counts = {key: counts for key, counts in self._counts.items() if key[1] in live}
+
+    def fail_closed_clear(self) -> int:
+        """Pressure fallback: forget all counters without a COW allocation.
+
+        Snapshots have their own dictionaries and remain unchanged. No
+        reservation is needed; errors from the shared ledger are not swallowed.
+        The return value counts discarded forecast keys.
+        """
+        budget = self.memory_budget
+        if budget is None:
+            with self._lock:
+                discarded = len(self._counts)
+                self._counts.clear()
+                return discarded
+        with budget.transaction(), self._lock:
+            discarded = len(self._counts)
+            self._counts.clear()
+            return discarded
 
 
 @dataclass(frozen=True)
@@ -272,8 +397,70 @@ class LookaheadPlanner:
     ) -> None:
         self.config = config or PlannerConfig()
         self.forecasts = forecasts if forecasts is not None else ForecastTable()
+        self.memory_budget = None
+        self._memory_workspace = None
+        self._memory_returned = None
+        if getattr(self.forecasts, "memory_budget", None) is not None:
+            self.bind_memory_budget(self.forecasts.memory_budget)
+
+    def bind_memory_budget(self, budget):
+        """Charge planning copies/workspace in the same cache heap domain."""
+        import weakref
+        if self.memory_budget is budget:
+            return
+        if self.memory_budget is not None:
+            raise ValueError("Planner cannot change its cache memory domain")
+        self.forecasts.bind_memory_budget(budget)
+        self._memory_returned = weakref.WeakValueDictionary()
+        try:
+            self._memory_handle = budget.register_root("planner:" + str(id(self)), self._memory_roots,
+                                                       category="planner_workspace")
+            self.memory_budget = budget
+        except BaseException:
+            self._memory_returned = None
+            self.memory_budget = None
+            raise
+
+    def _memory_roots(self):
+        return (self, tuple(self._memory_returned.values()) if self._memory_returned is not None else ())
+
+    def _memory_call(self, function, workflow, subgraphs, snapshot, *args, **kwargs):
+        if self.memory_budget is None and getattr(self.forecasts, "memory_budget", None) is not None:
+            self.bind_memory_budget(self.forecasts.memory_budget)
+        if self.memory_budget is None:
+            return function(*args, **kwargs)
+        nodes, records = len(workflow.nodes), len(snapshot.records)
+        branch = nodes + records + 1
+        if self.config.search_strategy == SearchStrategy.EXHAUSTIVE:
+            plans = self.config.exhaustive_max_plans
+        else:
+            beam = 1 if self.config.mode == PlanningMode.GREEDY else self.config.beam_width
+            plans = beam * branch * min(nodes, self.config.depth)
+        scenarios = min(self.config.scenario_limit, 2 ** min(nodes, self.config.depth))
+        # Reserve before allocating a frontier. This conservative finite
+        # workspace is not a measured RSS value; actual retained graph bytes
+        # and the reservation are reported independently by the shared ledger.
+        scratch = 65536 + records * 256 + plans * (1024 + nodes * 512) * max(1, scenarios)
+        try:
+            with self.memory_budget.transaction(), self.memory_budget.reservation(scratch, "planning") as token:
+                self._memory_workspace = {}
+                result = function(*args, **kwargs)
+                self._memory_returned[id(result)] = result
+                # Drop construction workspaces before converting the reserved
+                # capacity to the returned, still-live decision/estimate.
+                self._memory_workspace = None
+                token.commit()
+                return result
+        finally:
+            self._memory_workspace = None
 
     def choose(
+        self, workflow, subgraphs, completed, state, snapshot, eligible, epoch,
+    ):
+        return self._memory_call(self._choose_unbudgeted, workflow, subgraphs, snapshot,
+                                 workflow, subgraphs, completed, state, snapshot, eligible, epoch)
+
+    def _choose_unbudgeted(
         self,
         workflow: WorkflowSpec,
         subgraphs: Sequence[SubgraphSpec],
@@ -330,6 +517,12 @@ class LookaheadPlanner:
         )
 
     def estimate(
+        self, workflow, subgraphs, snapshot, epoch,
+    ):
+        return self._memory_call(self._estimate_unbudgeted, workflow, subgraphs, snapshot,
+                                 workflow, subgraphs, snapshot, epoch)
+
+    def _estimate_unbudgeted(
         self,
         workflow: WorkflowSpec,
         subgraphs: Sequence[SubgraphSpec],
@@ -410,6 +603,9 @@ class LookaheadPlanner:
         records, checked, initial_ready, entries_with_records = self._prepare(
             workflow, subgraphs, completed, snapshot, eligible, epoch
         )
+        if self._memory_workspace is not None:
+            self._memory_workspace.update(forecasts=forecasts, records=records, checked=checked,
+                                          ready=initial_ready, entries=entries_with_records)
         if self.config.search_strategy == SearchStrategy.EXHAUSTIVE:
             return self._exhaustive_search(
                 workflow, subgraphs, completed, snapshot, records, checked, initial_ready,
@@ -452,9 +648,13 @@ class LookaheadPlanner:
                 ):
                     expanded.append(_Plan(plan.covered.union(step.nodes), plan.steps + (step,)))
                     statistics["expanded_plans"] += 1
+            if self._memory_workspace is not None:
+                self._memory_workspace.update(plans=plans, expanded=expanded, statistics=statistics)
             if not expanded:
                 raise ValueError("workflow has no executable action; check DAG dependencies")
             scored = [(self._score(workflow, p, entries_with_records, snapshot.version), p) for p in expanded]
+            if self._memory_workspace is not None:
+                self._memory_workspace["scored"] = scored
             statistics["scored_plans"] += len(scored)
             statistics["pruned_plans"] += max(0, len(scored) - self.config.beam_width)
             statistics["search_depth_reached"] = depth + 1
@@ -547,7 +747,7 @@ class LookaheadPlanner:
         identities = {s.identity: s for s in subgraphs}
         if any(not set(s.node_ids).issubset(workflow.nodes) for s in subgraphs):
             raise ValueError("subgraph contains nodes outside this workflow")
-        if any(workflow.subgraph(s.name, s.node_ids, s.critical_fields).identity != s.identity for s in subgraphs):
+        if any(workflow.subgraph(s.name, s.node_ids, s.critical_fields, similarity_fields=s.similarity_fields).identity != s.identity for s in subgraphs):
             raise ValueError("subgraph identity does not belong to this declared workflow")
         records: Dict[str, list] = {}
         for record in snapshot.records:

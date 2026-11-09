@@ -73,7 +73,7 @@ class D1Config:
                     (ResidencyMode.FULL, ResidencyMode.ADDITIVE_VALUE),
                 "memory_accounting": "managed serialized payload plus metadata reserve; not RSS",
                 "lifecycle": "explicit maintenance; common audit reserve, pins and version checks",
-                "legacy_source": "experiments/eviction_policy/run_experiment.py:ByteCapacityCache._retention_score",
+                "legacy_source": "workflow.residency.OpportunityCacheManager.legacy_density",
             },
         }
 

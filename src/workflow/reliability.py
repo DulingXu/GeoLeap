@@ -15,10 +15,13 @@ import math
 import random
 import threading
 import time
+import uuid
+import weakref
 from typing import Any, Callable, Dict, Iterable, Mapping, Optional, Tuple
 
+from .memory import CacheMemoryBudget, CacheMemoryError, measure_object_graph
 from .records import CacheSnapshot, CachedRecord
-from .spec import SubgraphSpec, canonical_json, cosine, encode_input
+from .spec import SubgraphSpec, canonical_json, cosine, encode_similarity_input, LEGACY_INPUT_ENCODER
 
 
 class ScreeningMode(str, Enum):
@@ -139,6 +142,55 @@ class ReliabilityTable:
         self._statistics: Dict[Tuple[str, str, int, str, int], _Statistics] = {}
         self._capacities: Dict[str, int] = {}
         self._lock = threading.RLock()
+        self.memory_budget = None
+        self._memory_prefix = "reliability:" + uuid.uuid4().hex
+        self._memory_handle = None
+        self._memory_finalizer = None
+        self._pending_workspace = None
+
+    def _memory_root(self):
+        # register_root weakly stores this bound method. Returning the owner
+        # accounts its control fields and any old/new COW workspace together.
+        return self
+
+    def bind_memory_budget(self, budget: CacheMemoryBudget) -> None:
+        """Bind an accounted Python-heap domain without retaining this owner.
+
+        This is not a process RSS cap. An existing table is measured on bind;
+        changing or silently removing its accounting domain is not permitted.
+        """
+        if self.memory_budget is budget:
+            return
+        if self.memory_budget is not None:
+            raise ValueError("A reliability table cannot change its memory budget domain")
+        if not isinstance(budget, CacheMemoryBudget):
+            raise TypeError("budget must be a CacheMemoryBudget")
+        with budget.transaction(), self._lock:
+            handle = None
+            try:
+                self.memory_budget = budget
+                handle = budget.register_root(self._memory_prefix, self._memory_root, category="reliability")
+                self._memory_handle = handle
+                self._memory_finalizer = weakref.finalize(self, handle.close)
+                budget.check()
+            except BaseException:
+                if self._memory_finalizer is not None:
+                    self._memory_finalizer.detach()
+                self._memory_handle = self._memory_finalizer = None
+                self.memory_budget = None
+                if handle is not None:
+                    handle.close()
+                raise
+
+    def _heap_reservation_bytes(self, *, metadata_bytes=0, bootstrap=False) -> int:
+        current = measure_object_graph({"statistics": self._statistics,
+                                        "capacities": self._capacities})["owned_heap_bytes"]
+        metadata = max(metadata_bytes, max(self._capacities.values(), default=0))
+        # Full old/new maps and histories coexist. JSON serialization and its
+        # decoded/list scaffolding are bounded conservatively by the metadata
+        # allocation; bootstrap floats/list slots are separately reserved.
+        return (16384 + 2 * current + 8 * metadata
+                + (128 * (self.config.bootstrap_samples + self.config.max_groups) if bootstrap else 0))
 
     def clone(self, config: Optional[ReliabilityConfig] = None) -> "ReliabilityTable":
         """Copy one historical view without changing observations or their age.
@@ -159,6 +211,8 @@ class ReliabilityTable:
         if incompatible:
             raise ValueError("Evidence cloning cannot change statistical/history settings: "
                              + ", ".join(incompatible))
+        if self.memory_budget is not None:
+            return self._clone_with_heap(target)
         copied = ReliabilityTable(target, clock=self._clock)
         with self._lock:
             copied._statistics = {
@@ -169,6 +223,41 @@ class ReliabilityTable:
             }
             copied._capacities = dict(self._capacities)
         return copied
+
+    def _clone_with_heap(self, target):
+        budget = self.memory_budget
+        copied = None
+        with budget.transaction(), self._lock:
+            try:
+                with budget.reservation(self._heap_reservation_bytes(), "reliability_clone") as token:
+                    self._pending_workspace = {"old": (self._statistics, self._capacities)}
+                    copied = ReliabilityTable(target, clock=self._clock)
+                    self._pending_workspace["copy"] = copied
+                    copied._statistics = {
+                        key: _Statistics(groups=OrderedDict(history.groups), updated_at=history.updated_at,
+                                         evidence=replace(history.evidence) if history.evidence is not None else None,
+                                         record_digest=history.record_digest)
+                        for key, history in self._statistics.items()
+                    }
+                    copied._capacities = dict(self._capacities)
+                    # The parent's workspace owns the copy until its own weak
+                    # root is registered. Never return an unbudgeted snapshot.
+                    token.commit()
+                    copied.bind_memory_budget(budget)
+                return copied
+            except BaseException:
+                # A propagated traceback can retain this local object. Empty
+                # the failed candidate so it cannot keep an unreturned payload
+                # alive after its temporary root is cleared.
+                self._pending_workspace = None
+                if copied is not None:
+                    copied._statistics, copied._capacities = {}, {}
+                    if copied._memory_finalizer is not None:
+                        copied._memory_finalizer()
+                    copied.memory_budget = None
+                raise
+            finally:
+                self._pending_workspace = None
 
     def snapshot(self, config: Optional[ReliabilityConfig] = None) -> "ReliabilityTable":
         """Return an independent historical snapshot; an alias for ``clone``."""
@@ -201,6 +290,8 @@ class ReliabilityTable:
         if not math.isfinite(disagreement) or not 0.0 <= disagreement <= 1.0:
             raise ValueError("disagreement must lie in [0, 1]")
         key = self._key(spec, record, epoch, similarity)
+        if self.memory_budget is not None:
+            return self._observe_with_heap(record, key, request_id, disagreement)
         group_id = hashlib.sha256(request_id.encode("utf-8")).hexdigest()
         with self._lock:
             previous = self._statistics.get(key)
@@ -228,8 +319,56 @@ class ReliabilityTable:
             self._capacities[record.record_id] = record.metadata_capacity
             return True
 
+    def _observe_with_heap(self, record, key, request_id, disagreement):
+        budget = self.memory_budget
+        with budget.transaction(), self._lock:
+            old = (self._statistics, self._capacities)
+            try:
+                # serialized() decodes the immutable record payload. Reserve
+                # for that temporary object graph before constructing it.
+                payload_chars = sum(len(value) for value in (record.input_json, record.output_json,
+                                     record.subgraph_id, record.record_id, record.epoch))
+                reserve = (self._heap_reservation_bytes(metadata_bytes=record.metadata_capacity)
+                           + 128 * payload_chars + 128 * len(record.embedding) + 4 * len(request_id))
+                with budget.reservation(reserve, "reliability_observe") as token:
+                    work = {"old": old, "key": key}
+                    self._pending_workspace = work
+                    work["request_id_bytes"] = request_id.encode("utf-8")
+                    group_id = hashlib.sha256(work["request_id_bytes"]).hexdigest()
+                    work["group_id"] = group_id
+                    work["record_payload"] = record.serialized()
+                    digest = hashlib.sha256(work["record_payload"]).hexdigest()
+                    previous = self._statistics.get(key)
+                    if previous is not None and previous.record_digest != digest:
+                        return False
+                    candidate = _Statistics(groups=OrderedDict(previous.groups) if previous else OrderedDict(),
+                                            updated_at=self._clock(), record_digest=digest)
+                    work["candidate"] = candidate
+                    total, count = candidate.groups.get(group_id, (0.0, 0))
+                    candidate.groups[group_id] = (total + disagreement, count + 1)
+                    while len(candidate.groups) > self.config.max_groups:
+                        candidate.groups.popitem(last=False)
+                    prospective, capacities = dict(self._statistics), dict(self._capacities)
+                    prospective[key] = candidate
+                    capacities[record.record_id] = record.metadata_capacity
+                    work["new"] = (prospective, capacities)
+                    work["encoded"] = self._serialize_record(record.record_id, prospective)
+                    active_keys = sum(item[1] == record.record_id for item in prospective)
+                    if len(work["encoded"]) + 256 * active_keys > record.metadata_capacity:
+                        return False
+                    self._statistics, self._capacities = prospective, capacities
+                    token.commit()
+                return True
+            except MemoryError:
+                self._statistics, self._capacities = old
+                return False
+            finally:
+                self._pending_workspace = None
+
     def refresh(self) -> int:
         """Compute deterministic group-bootstrap statistics outside lookup."""
+        if self.memory_budget is not None:
+            return self._refresh_with_heap()
         refreshed = 0
         with self._lock:
             for key, history in self._statistics.items():
@@ -257,6 +396,57 @@ class ReliabilityTable:
                 else:
                     refreshed += 1
         return refreshed
+
+    def _refresh_with_heap(self):
+        budget = self.memory_budget
+        with budget.transaction(), self._lock:
+            if not self._statistics:
+                return 0
+            old = self._statistics
+            try:
+                with budget.reservation(self._heap_reservation_bytes(bootstrap=True), "reliability_refresh") as token:
+                    work = {"old": (old, self._capacities)}
+                    self._pending_workspace = work
+                    prospective = {}
+                    work["new"] = prospective
+                    for key, history in old.items():
+                        prospective[key] = _Statistics(groups=OrderedDict(history.groups), updated_at=history.updated_at,
+                            evidence=history.evidence, record_digest=history.record_digest)
+                    refreshed = 0
+                    for key, history in prospective.items():
+                        if not history.groups:
+                            continue
+                        values = [total / count for total, count in history.groups.values()]
+                        work["values"] = values
+                        mean = math.fsum(values) / len(values)
+                        seed_material = canonical_json([key, list(history.groups.items())])
+                        work["seed_material"] = seed_material
+                        seed = int.from_bytes(hashlib.sha256(seed_material.encode("utf-8")).digest()[:8], "big")
+                        rng = random.Random(seed)
+                        work["rng"] = rng
+                        bootstrap = []
+                        work["bootstrap"] = bootstrap
+                        for _ in range(self.config.bootstrap_samples):
+                            bootstrap.append(math.fsum(values[rng.randrange(len(values))] for _ in values) / len(values))
+                        bootstrap.sort()
+                        index = max(0, min(len(bootstrap) - 1,
+                                    math.ceil((1.0 - self.config.delta) * len(bootstrap)) - 1))
+                        margin = max(0.0, bootstrap[index] - mean)
+                        history.evidence = Evidence(len(values), mean, margin, min(1.0, mean + margin), history.updated_at)
+                        work["encoded"] = self._serialize_record(key[1], prospective)
+                        if len(work["encoded"]) > self._capacities[key[1]]:
+                            # Reject the whole refresh; never clear old evidence
+                            # as a side effect of a failed temporary allocation.
+                            return 0
+                        refreshed += 1
+                    self._statistics = prospective
+                    token.commit()
+                return refreshed
+            except MemoryError:
+                self._statistics = old
+                return 0
+            finally:
+                self._pending_workspace = None
 
     def lookup(
         self, spec: SubgraphSpec, record: CachedRecord, epoch: str, similarity: float
@@ -375,10 +565,58 @@ class ReliabilityTable:
             return self._serialize_record(record_id, self._statistics)
 
     def discard_records(self, live_ids: Iterable[str]) -> None:
+        if self.memory_budget is not None:
+            return self._discard_with_heap(live_ids)
         live = set(live_ids)
         with self._lock:
             self._statistics = {key: value for key, value in self._statistics.items() if key[1] in live}
             self._capacities = {key: value for key, value in self._capacities.items() if key in live}
+
+    def _discard_with_heap(self, live_ids):
+        budget = self.memory_budget
+        with budget.transaction(), self._lock:
+            old = (self._statistics, self._capacities)
+            try:
+                with budget.reservation(self._heap_reservation_bytes(), "reliability_discard") as token:
+                    work = {"old": old}
+                    self._pending_workspace = work
+                    # Unknown IDs do not need to be retained in this workspace;
+                    # this bounds it even if the caller supplies a long iterator.
+                    known = set(self._capacities)
+                    live = {identity for identity in live_ids if identity in known}
+                    work["sets"] = (known, live)
+                    statistics = {key: value for key, value in self._statistics.items() if key[1] in live}
+                    capacities = {key: value for key, value in self._capacities.items() if key in live}
+                    work["new"] = (statistics, capacities)
+                    self._statistics, self._capacities = statistics, capacities
+                    token.commit()
+                return True
+            except MemoryError:
+                self._statistics, self._capacities = old
+                return False
+            finally:
+                self._pending_workspace = None
+
+    def fail_closed_clear(self) -> int:
+        """Drop all evidence in place when COW cleanup cannot obtain space.
+
+        This explicit pressure downgrade intentionally has no rollback copy or
+        reservation. Independent snapshots own separate maps/histories. Ledger
+        errors still propagate rather than disguising an unsuccessful reset.
+        The return value counts discarded record/bin statistics, not records.
+        """
+        budget = self.memory_budget
+        if budget is None:
+            with self._lock:
+                discarded = len(self._statistics)
+                self._statistics.clear()
+                self._capacities.clear()
+                return discarded
+        with budget.transaction(), self._lock:
+            discarded = len(self._statistics)
+            self._statistics.clear()
+            self._capacities.clear()
+            return discarded
 
 
 @dataclass(frozen=True)
@@ -423,6 +661,7 @@ class Matcher:
         sim_threshold: float = 0.8,
         *,
         allow_exact: bool = True,
+        input_encoder_id: str = LEGACY_INPUT_ENCODER,
     ) -> None:
         self.table = table
         self.config = config or table.config
@@ -432,12 +671,17 @@ class Matcher:
             raise ValueError("sim_threshold must lie in [-1, 1]")
         self.sim_threshold = sim_threshold
         self.allow_exact = allow_exact
+        self.input_encoder_id = input_encoder_id
+        self._semantic_vectors = {}  # Insertion-ordered LRU, charged through runtime roots.
+        self._semantic_vector_bytes = 0
         self.last_rejections: list = []
 
     def compatible(self, spec: SubgraphSpec, record: CachedRecord,
                    inputs: Mapping[str, Any], epoch: str) -> bool:
         """Shared guard for serving and explicit audit-only comparisons."""
-        if spec.identity != record.subgraph_id or record.epoch != epoch:
+        if (spec.identity != record.subgraph_id or record.epoch != epoch
+                or spec.similarity_fields != record.embedding_fields
+                or self.input_encoder_id != record.embedding_encoder):
             return False
         try:
             cached_inputs, cached_outputs = record.inputs, record.outputs
@@ -451,7 +695,27 @@ class Matcher:
             return False
 
     def similarity(self, inputs: Mapping[str, Any], record: CachedRecord) -> float:
-        return max(-1.0, min(1.0, cosine(encode_input(inputs), record.embedding)))
+        if record.embedding_encoder != self.input_encoder_id:
+            raise ValueError("Cannot compare different input encoder namespaces")
+        fields = record.embedding_fields
+        projected = {key: inputs[key] for key in fields} if fields else inputs
+        if self.input_encoder_id == LEGACY_INPUT_ENCODER:
+            vector = encode_similarity_input(projected)
+        else:
+            key = canonical_json(projected)
+            if key in self._semantic_vectors:
+                vector, charge = self._semantic_vectors.pop(key)
+                self._semantic_vectors[key] = (vector, charge)
+            else:
+                vector = encode_similarity_input(projected, self.input_encoder_id)
+                charge = len(key.encode('utf-8')) * 4 + 64 * len(vector) + 512
+                if charge <= 4*1024**2:
+                    while self._semantic_vectors and (len(self._semantic_vectors) >= 64 or self._semantic_vector_bytes + charge > 4*1024**2):
+                        _, old_charge = self._semantic_vectors.pop(next(iter(self._semantic_vectors)))
+                        self._semantic_vector_bytes -= old_charge
+                    self._semantic_vectors[key] = (vector, charge)
+                    self._semantic_vector_bytes += charge
+        return max(-1.0, min(1.0, cosine(vector, record.embedding)))
 
     def eligible(self, spec: SubgraphSpec, state: Mapping[str, Any], snapshot: CacheSnapshot,
                  epoch: str, allow_exact: bool = True) -> Tuple[EligibleRecord, ...]:

@@ -46,6 +46,38 @@ def encode_input(value: Any, dimensions: int = 128) -> Tuple[float, ...]:
     return tuple(item / norm for item in vector)
 
 
+LEGACY_INPUT_ENCODER = "char3gram-sha256-128-v1"
+_INPUT_ENCODERS = {}
+
+
+def register_input_encoder(identity: str, encoder: Callable[[Any], Sequence[float]]) -> None:
+    """Register an immutable, externally fingerprinted encoder for this process.
+
+    Model/native resources belong to the process envelope. This registry has
+    no input/vector memoization; cached vectors belong to their record budget.
+    """
+    if not isinstance(identity, str) or not identity or identity == LEGACY_INPUT_ENCODER or not callable(encoder):
+        raise ValueError("A distinct versioned input encoder identity and callable are required")
+    if identity in _INPUT_ENCODERS and _INPUT_ENCODERS[identity] is not encoder:
+        raise ValueError("An input encoder identity cannot be rebound")
+    _INPUT_ENCODERS[identity] = encoder
+
+
+def encode_similarity_input(value: Any, identity: str = LEGACY_INPUT_ENCODER) -> Tuple[float, ...]:
+    if identity == LEGACY_INPUT_ENCODER:
+        return encode_input(value)
+    if identity not in _INPUT_ENCODERS:
+        raise ValueError("Unregistered input encoder: " + identity)
+    canonical_json(value)
+    vector = tuple(float(item) for item in _INPUT_ENCODERS[identity](value))
+    if not 1 <= len(vector) <= 4096 or any(not math.isfinite(item) for item in vector):
+        raise ValueError("Input encoder must return a bounded finite vector")
+    norm = math.sqrt(sum(item * item for item in vector))
+    if norm <= 0:
+        raise ValueError("Input encoder returned a zero vector")
+    return tuple(item / norm for item in vector)
+
+
 def cosine(left: Sequence[float], right: Sequence[float]) -> float:
     if len(left) != len(right):
         return 0.0
@@ -129,6 +161,7 @@ class SubgraphSpec:
     input_schema: Tuple[Tuple[str, str], ...]
     output_schema: Tuple[Tuple[str, str], ...]
     exact_safe: bool
+    similarity_fields: Tuple[str, ...] = ()
 
     def project(self, state: Mapping[str, Any]) -> Dict[str, Any]:
         return json.loads(canonical_json({key: state[key] for key in self.input_fields}))
@@ -187,7 +220,8 @@ class WorkflowSpec:
         return tuple(key for key in self.topological_order if key not in completed and
                      set(self.nodes[key].dependencies).issubset(completed))
 
-    def subgraph(self, name: str, node_ids: Sequence[str], critical_fields: Sequence[str] = ()) -> SubgraphSpec:
+    def subgraph(self, name: str, node_ids: Sequence[str], critical_fields: Sequence[str] = (),
+                 *, similarity_fields: Sequence[str] = ()) -> SubgraphSpec:
         selected = set(node_ids)
         if not selected or not selected.issubset(self.nodes):
             raise ValueError("Subgraph nodes must belong to this workflow")
@@ -222,6 +256,10 @@ class WorkflowSpec:
         critical = tuple(sorted(set(critical_fields)))
         if not set(critical).issubset(inputs):
             raise ValueError("Critical fields must be declared boundary inputs")
+        soft = tuple(similarity_fields)
+        if any(not isinstance(key, str) for key in soft) or not set(soft).issubset(inputs):
+            raise ValueError("Similarity fields must be declared boundary inputs")
+        soft = tuple(sorted(set(soft)))
         description = {
             "workflow": workflow_id_identity(self.workflow_id, self.version),
             "operators": [
@@ -235,10 +273,12 @@ class WorkflowSpec:
             ],
             "entry": entry, "exit": exit_node, "critical": critical,
         }
+        if soft:
+            description["similarity_fields"] = soft
         identity = hashlib.sha256(canonical_json(description).encode("utf-8")).hexdigest()
         return SubgraphSpec(name, identity, ordered, entry, exit_node, tuple(sorted(inputs)),
                             tuple(key for key, _ in outputs), critical, tuple(sorted(inputs.items())), outputs,
-                            all(self.nodes[key].stable for key in ordered))
+                            all(self.nodes[key].stable for key in ordered), soft)
 
 
 def workflow_id_identity(workflow_id: str, version: str) -> str:

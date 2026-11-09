@@ -6,7 +6,7 @@ GeoLeap 的核心工作流缓存实现，包含子图结构检查、记录级可
 
 ## 快速运行
 
-需要 Python 3.10 或更新版本；本次发布使用 Python 3.13 验证。
+需要 Python 3.10 或更新版本。
 
 ```bash
 git clone https://github.com/DulingXu/GeoLeap.git
@@ -27,6 +27,9 @@ PYTHONPATH=src python3 examples/core_demo.py
 | `planner.py`、`scheduling.py`、`c1.py`、`c2.py` | NoCache / Greedy / Full；有界前瞻与小 DAG 的同信息 Exhaustive 参照 |
 | `residency.py`、`d1.py`、`d2.py` | LRU / LegacyDensity / AdditiveValue / Full，以及需求和经济画像变化驱动 |
 | `runtime.py`、`observability.py` | 实际跳过缓存子图、恢复出口、下游续算、参考反馈和独立命中捕获 |
+| `memory.py` | 共享对象账本、事务预留、读者生命周期、预算拒绝与回退 |
+
+`spec.py` 提供可版本化的输入编码器注册接口。默认使用本地128维字符三元组；外部编码器通过显式身份注入运行时，记录保存编码器身份，跨编码器复用会被拒绝。可选查询向量缓存有条目和字节上限，并纳入共享对象预算；本仓库不附带外部模型或模型权重。
 
 统一运行时名称为 `GeoLeapRuntime`：
 
@@ -60,7 +63,10 @@ Python 中可用相应配置类的 `make_runtime` / `make_planner` 构造执行�
 ## 实现范围
 
 执行器当前为单请求、串行实现；多 worker 调度仅用于规划器静态诊断。Exhaustive 在规模超限时明确报错。
-可靠性分数是分组历史与经验余量，不构成严格失败概率保证。缓存内存指标是序列化载荷加元数据预留，不是进程 RSS。
+可靠性分数是分组历史与经验余量，不构成严格失败概率保证。
+缓存可采用序列化存储预算，或启用共享的Python对象账本与保守预留；两者均不等于进程RSS或完整物理内存上限。原生分配、分配器碎片和未注册临时对象存在计量边界，详见[内存接口](doc/cache_memory.md)。
 静态费用画像与实际 API 账单分开；外部服务通过算子函数和观测接口接入。LegacyDensity 是旧密度公式在当前记录框架上的适配。
+
+本仓库的范围是核心实现、接口示例和离线功能检查。Benchmark数据、实验驱动、部署配置、运行产物和实验结果不属于本发布包；检查输出不能用作性能、任务质量或费用收益的实测依据。
 
 详细检测对象见 [checks/README.md](checks/README.md)。

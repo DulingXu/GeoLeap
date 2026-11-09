@@ -24,6 +24,13 @@ MODULES = (
     ("d1_residency_switches", "check_d1_residency_switches.py", "D1：驻留策略消融开关"),
     ("d2_change_response", "check_d2_change_response.py", "D2：需求与经济画像变化"),
     ("core_integration", "check_core_integration.py", "B/C/D：联通检查"),
+    ("memory_ledger", "check_memory_ledger.py", "内存：共享对象与事务预留"),
+    ("evidence_memory", "check_evidence_memory.py", "内存：证据与预测表"),
+    ("cache_manager_memory", "check_cache_manager_memory.py", "内存：队列与驻留管理"),
+    ("cache_memory_budget", "check_cache_memory_budget.py", "内存：发布、读者与回退"),
+    ("runtime_memory_failures", "check_runtime_memory_failures.py", "内存：运行时失败路径"),
+    ("similarity_projection", "check_similarity_projection.py", "输入：字段投影与版本隔离"),
+    ("input_encoder", "check_input_encoder.py", "输入：编码器接口与有界向量缓存"),
 )
 
 

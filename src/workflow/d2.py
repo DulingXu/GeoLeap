@@ -190,7 +190,7 @@ class D2Runner:
                        node.dependencies, node.read_fields, node.write_fields,
                        node.input_schema, node.output_schema, node.cacheable, node.stable, node.effect_free)
                       for node in runtime.workflow.operators),
-                tuple(runtime.workflow.subgraph(spec.name, spec.node_ids, spec.critical_fields).identity
+                tuple(runtime.workflow.subgraph(spec.name, spec.node_ids, spec.critical_fields, similarity_fields=spec.similarity_fields).identity
                       for spec in runtime.subgraphs), runtime.config,
                 runtime.matcher.config, runtime.matcher.sim_threshold, runtime.matcher.allow_exact,
                 runtime.planner.config, runtime.manager.config)
