@@ -1,0 +1,116 @@
+{
+  "performance_evaluation": "not_run",
+  "quality_evaluation": "not_run",
+  "real_service_execution": "not_run",
+  "scenarios": {
+    "qa": {
+      "branched_template_count": 94,
+      "cache_region_count": 1866,
+      "exact_nonisomorphic_topologies": 100,
+      "generation_statistics": {
+        "candidates_attempted": 128,
+        "isomorphic_duplicates_rejected": 28,
+        "templates_accepted": 100
+      },
+      "maximum_antichain_width": {
+        "max": 8,
+        "min": 1
+      },
+      "nodes": {
+        "histogram": {
+          "3": 1,
+          "4": 2,
+          "5": 4,
+          "6": 7,
+          "7": 10,
+          "8": 14,
+          "9": 16,
+          "10": 16,
+          "11": 3,
+          "12": 6,
+          "13": 2,
+          "14": 1,
+          "15": 1,
+          "16": 1,
+          "17": 1,
+          "18": 3,
+          "19": 2,
+          "20": 1,
+          "24": 2,
+          "26": 3,
+          "28": 1,
+          "42": 2,
+          "50": 1
+        },
+        "max": 50,
+        "mean": 11.52,
+        "median": 9.0,
+        "min": 3
+      },
+      "size_strata": {
+        "extra_large": 3,
+        "large": 7,
+        "medium": 20,
+        "small": 70
+      },
+      "template_count": 100,
+      "total_declared_nodes": 1152
+    },
+    "sql": {
+      "branched_template_count": 92,
+      "cache_region_count": 1841,
+      "exact_nonisomorphic_topologies": 100,
+      "generation_statistics": {
+        "candidates_attempted": 128,
+        "isomorphic_duplicates_rejected": 28,
+        "templates_accepted": 100
+      },
+      "maximum_antichain_width": {
+        "max": 8,
+        "min": 1
+      },
+      "nodes": {
+        "histogram": {
+          "3": 1,
+          "4": 2,
+          "5": 4,
+          "6": 7,
+          "7": 10,
+          "8": 14,
+          "9": 16,
+          "10": 16,
+          "11": 2,
+          "13": 3,
+          "14": 2,
+          "15": 5,
+          "16": 1,
+          "17": 1,
+          "18": 3,
+          "19": 3,
+          "20": 1,
+          "22": 2,
+          "24": 1,
+          "28": 2,
+          "29": 1,
+          "31": 1,
+          "33": 1,
+          "50": 1
+        },
+        "max": 50,
+        "mean": 11.54,
+        "median": 9.0,
+        "min": 3
+      },
+      "size_strata": {
+        "extra_large": 3,
+        "large": 7,
+        "medium": 20,
+        "small": 70
+      },
+      "template_count": 100,
+      "total_declared_nodes": 1154
+    }
+  },
+  "seed": 20261111,
+  "version": "geoleap-typed-dag-v1"
+}

@@ -1,0 +1,489 @@
+{
+  "branch_roles": {
+    "qa.answer": [
+      "direct_evidence",
+      "decomposed_reasoning",
+      "constraint_first",
+      "cross_checked_reasoning"
+    ],
+    "qa.expand_query": [
+      "bridge_entity",
+      "supporting_relation",
+      "constraint_resolution",
+      "cross_check"
+    ],
+    "qa.extract_facts": [
+      "entities",
+      "relations",
+      "dates_and_numbers",
+      "question_constraints"
+    ],
+    "qa.rerank": [
+      "entity_relevance",
+      "relation_relevance",
+      "constraint_relevance",
+      "source_diversity"
+    ],
+    "qa.retrieve": [
+      "entity_anchor",
+      "relation_bridge",
+      "constraint_detail",
+      "independent_verification"
+    ],
+    "qa.rewrite_query": [
+      "entity_disambiguation",
+      "relation_expansion",
+      "temporal_constraint",
+      "alternative_surface_form"
+    ],
+    "qa.summarize": [
+      "entity_profile",
+      "relation_summary",
+      "constraint_summary",
+      "source_comparison"
+    ],
+    "qa.verify_evidence": [
+      "entity_identity",
+      "relation_support",
+      "constraint_support",
+      "contradiction_check"
+    ],
+    "sql.classify": [
+      "join_complexity",
+      "aggregation_complexity",
+      "nesting_complexity",
+      "filter_complexity"
+    ],
+    "sql.decompose": [
+      "projection",
+      "filter_and_join",
+      "aggregation",
+      "ordering_and_nesting"
+    ],
+    "sql.generate": [
+      "direct",
+      "decomposition_guided",
+      "join_first",
+      "aggregation_first"
+    ],
+    "sql.join_analysis": [
+      "foreign_key_paths",
+      "key_cardinality",
+      "bridge_tables",
+      "alternative_join_paths"
+    ],
+    "sql.prune_schema": [
+      "projection_columns",
+      "filter_columns",
+      "join_keys",
+      "aggregation_columns"
+    ],
+    "sql.repair": [
+      "syntax_and_names",
+      "join_semantics",
+      "aggregation_semantics",
+      "constraint_semantics"
+    ],
+    "sql.retrieve_values": [
+      "entity_values",
+      "categorical_values",
+      "date_ranges",
+      "numeric_ranges"
+    ]
+  },
+  "limits": {
+    "max_antichain_width": 8,
+    "max_branch_fanout": 4,
+    "max_nodes": 50,
+    "max_parent_count": 4,
+    "max_retrievals_per_path": 4,
+    "max_same_operator_per_path": 2,
+    "max_sql_repairs_per_path": 2
+  },
+  "operators": {
+    "qa.answer": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Answer the current question using all parent evidence artifacts.",
+      "input_types": [
+        "qa.evidence"
+      ],
+      "kind": "LLM",
+      "max_inputs": 4,
+      "min_inputs": 1,
+      "output_type": "qa.answer",
+      "required_data": {
+        "answer": "string",
+        "documents": "array"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "qa.expand_query": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Generate the next-hop query using current question and intermediate evidence; carry all input evidence documents forward.",
+      "input_types": [
+        "qa.evidence"
+      ],
+      "kind": "LLM",
+      "max_inputs": 1,
+      "min_inputs": 1,
+      "output_type": "qa.query_plan",
+      "required_data": {
+        "documents": "array",
+        "queries": "array"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "qa.extract_facts": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Extract supported facts while retaining source passage IDs.",
+      "input_types": [
+        "qa.evidence"
+      ],
+      "kind": "LLM",
+      "max_inputs": 1,
+      "min_inputs": 1,
+      "output_type": "qa.evidence",
+      "required_data": {
+        "documents": "array"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "qa.merge_evidence": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Union and deduplicate all parent evidence by source ID.",
+      "input_types": [
+        "qa.evidence"
+      ],
+      "kind": "Compute",
+      "max_inputs": 4,
+      "min_inputs": 2,
+      "output_type": "qa.evidence",
+      "required_data": {
+        "documents": "array"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "qa.query_plan": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Plan an initial evidence query from the current question; initialize carried documents to an empty list.",
+      "input_types": [],
+      "kind": "LLM",
+      "max_inputs": 0,
+      "min_inputs": 0,
+      "output_type": "qa.query_plan",
+      "required_data": {
+        "documents": "array",
+        "queries": "array"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "qa.rerank": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Rank passages for the declared evidence intent.",
+      "input_types": [
+        "qa.evidence"
+      ],
+      "kind": "Tool",
+      "max_inputs": 1,
+      "min_inputs": 1,
+      "output_type": "qa.evidence",
+      "required_data": {
+        "documents": "array"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "qa.retrieve": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Retrieve real passages using the declared strategy; merge carried documents with new passages and retain provenance.",
+      "input_types": [
+        "qa.query_plan"
+      ],
+      "kind": "Tool",
+      "max_inputs": 1,
+      "min_inputs": 1,
+      "output_type": "qa.evidence",
+      "required_data": {
+        "documents": "array"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "qa.rewrite_query": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Rewrite a query for a declared complementary evidence intent; preserve carried documents.",
+      "input_types": [
+        "qa.query_plan"
+      ],
+      "kind": "LLM",
+      "max_inputs": 1,
+      "min_inputs": 1,
+      "output_type": "qa.query_plan",
+      "required_data": {
+        "documents": "array",
+        "queries": "array"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "qa.select_answer": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Compare all candidate answers and their retained evidence.",
+      "input_types": [
+        "qa.answer"
+      ],
+      "kind": "LLM",
+      "max_inputs": 4,
+      "min_inputs": 2,
+      "output_type": "qa.answer",
+      "required_data": {
+        "answer": "string",
+        "documents": "array"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "qa.summarize": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Compress evidence with source provenance.",
+      "input_types": [
+        "qa.evidence"
+      ],
+      "kind": "LLM",
+      "max_inputs": 1,
+      "min_inputs": 1,
+      "output_type": "qa.evidence",
+      "required_data": {
+        "documents": "array"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "qa.verify_evidence": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Check whether evidence supports the current question's constraints.",
+      "input_types": [
+        "qa.evidence"
+      ],
+      "kind": "LLM",
+      "max_inputs": 1,
+      "min_inputs": 1,
+      "output_type": "qa.evidence",
+      "required_data": {
+        "documents": "array"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "sql.classify": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Classify query complexity and annotate generation context.",
+      "input_types": [
+        "sql.context"
+      ],
+      "kind": "LLM",
+      "max_inputs": 1,
+      "min_inputs": 1,
+      "output_type": "sql.context",
+      "required_data": {
+        "schema_context": "object"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "sql.decompose": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Decompose the question into relational requirements.",
+      "input_types": [
+        "sql.context"
+      ],
+      "kind": "LLM",
+      "max_inputs": 1,
+      "min_inputs": 1,
+      "output_type": "sql.context",
+      "required_data": {
+        "schema_context": "object"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "sql.execute": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Execute candidate SQL read-only with timeout; return execution diagnostics, never gold comparisons.",
+      "input_types": [
+        "sql.candidate"
+      ],
+      "kind": "Tool",
+      "max_inputs": 1,
+      "min_inputs": 1,
+      "output_type": "sql.checked",
+      "required_data": {
+        "execution": "object",
+        "schema_context": "object",
+        "sql": "string"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "sql.generate": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Generate one candidate SQL using every parent context.",
+      "input_types": [
+        "sql.context"
+      ],
+      "kind": "LLM",
+      "max_inputs": 4,
+      "min_inputs": 1,
+      "output_type": "sql.candidate",
+      "required_data": {
+        "schema_context": "object",
+        "sql": "string"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "sql.join_analysis": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Resolve join paths, keys and cardinality constraints.",
+      "input_types": [
+        "sql.context"
+      ],
+      "kind": "LLM",
+      "max_inputs": 1,
+      "min_inputs": 1,
+      "output_type": "sql.context",
+      "required_data": {
+        "schema_context": "object"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "sql.merge_context": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Merge all parent schema annotations, preserving disagreements.",
+      "input_types": [
+        "sql.context"
+      ],
+      "kind": "Compute",
+      "max_inputs": 4,
+      "min_inputs": 2,
+      "output_type": "sql.context",
+      "required_data": {
+        "schema_context": "object"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "sql.prune_schema": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Annotate selected schema elements for a relational concern; retain immutable base schema and join keys rather than destructively removing them.",
+      "input_types": [
+        "sql.context"
+      ],
+      "kind": "LLM",
+      "max_inputs": 1,
+      "min_inputs": 1,
+      "output_type": "sql.context",
+      "required_data": {
+        "schema_context": "object"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "sql.repair": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Revise SQL from current question, schema and observed execution diagnostics.",
+      "input_types": [
+        "sql.checked"
+      ],
+      "kind": "LLM",
+      "max_inputs": 1,
+      "min_inputs": 1,
+      "output_type": "sql.candidate",
+      "required_data": {
+        "schema_context": "object",
+        "sql": "string"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "sql.retrieve_values": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Read database values for grounding without modifying the database.",
+      "input_types": [
+        "sql.context"
+      ],
+      "kind": "Tool",
+      "max_inputs": 1,
+      "min_inputs": 1,
+      "output_type": "sql.context",
+      "required_data": {
+        "schema_context": "object"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "sql.schema_linking": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Link the current question to a fixed database schema and evidence.",
+      "input_types": [],
+      "kind": "LLM",
+      "max_inputs": 0,
+      "min_inputs": 0,
+      "output_type": "sql.context",
+      "required_data": {
+        "schema_context": "object"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "sql.select_and_correct": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Compare all candidates, then review the selected SQL; fused terminal selection.",
+      "input_types": [
+        "sql.candidate",
+        "sql.checked"
+      ],
+      "kind": "LLM",
+      "max_inputs": 4,
+      "min_inputs": 2,
+      "output_type": "sql.answer",
+      "required_data": {
+        "sql": "string"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "sql.select_candidate": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Compare candidate SQL and available diagnostics without reference SQL.",
+      "input_types": [
+        "sql.candidate",
+        "sql.checked"
+      ],
+      "kind": "LLM",
+      "max_inputs": 4,
+      "min_inputs": 2,
+      "output_type": "sql.candidate",
+      "required_data": {
+        "schema_context": "object",
+        "sql": "string"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "sql.self_correct": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Review and correct the selected SQL against the current task and schema.",
+      "input_types": [
+        "sql.candidate",
+        "sql.checked"
+      ],
+      "kind": "LLM",
+      "max_inputs": 1,
+      "min_inputs": 1,
+      "output_type": "sql.answer",
+      "required_data": {
+        "sql": "string"
+      },
+      "side_effects": "none; resource access must be read-only"
+    }
+  },
+  "sources": {
+    "basic_multihop": {
+      "code": "https://github.com/stanfordnlp/dspy/blob/e08bf0e4635764839800bd9bde17f472128433dc/tests/examples/test_baleen.py",
+      "paper": "https://arxiv.org/html/2310.03714#S7",
+      "title": "DSPy BasicMultiHop / SimplifiedBaleen",
+      "use": "Query generation, retrieval, answer stages; generated branches are our extensions."
+    },
+    "din_sql": {
+      "code": "https://github.com/MohammadrezaPourreza/Few-shot-NL2SQL-with-prompting/blob/79842fdfcba7598c1a69873348649d6b0dbbb551/DIN-SQL_BIRD.py",
+      "paper": "https://arxiv.org/abs/2304.11015",
+      "title": "DIN-SQL",
+      "use": "Schema linking, classification/decomposition, generation, self-correction stages; execution-guided repair is our extension."
+    }
+  },
+  "version": "geoleap-typed-dag-v1"
+}

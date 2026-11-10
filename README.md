@@ -7,7 +7,7 @@
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![Dependencies](https://img.shields.io/badge/Core-standard%20library-2563EB)](requirements.txt)
 
-[Quick start](#quick-start) · [Architecture](#architecture) · [Core API](#core-api) · [Configuration](#configuration) · [Scope](#scope-and-contracts)
+[Quick start](#quick-start) · [Architecture](#architecture) · [Core API](#core-api) · [Configuration](#configuration) · [Workflow catalog](#workflow-template-catalog) · [Scope](#scope-and-contracts)
 
 </div>
 
@@ -15,7 +15,7 @@ GeoLeap is a research implementation of workflow-level caching. It represents a 
 
 The core separates three decisions: **whether a record qualifies for reuse, which execution actions to choose, and which records to retain**. Screening rules, execution planning, and residency policies are independently configurable.
 
-This repository provides the core runtime, local examples, and offline functional checks. The core uses the Python standard library; no model credentials, external services, or benchmark data are needed to get started.
+This repository provides the core runtime, local examples, offline functional checks, and a generated workflow template catalog. The core uses the Python standard library; no model credentials, external services, or benchmark data are needed to get started.
 
 ## Quick start
 
@@ -153,6 +153,27 @@ PYTHONPATH=src python3 -m workflow.d2 --d2-stream demand_shift --d2-variant full
 
 These commands display configuration; they do not run benchmarks. Python callers can use the configuration classes' `make_runtime` or `make_planner` factories. `C1Config` and `C2Config` prepare fixed-cache comparisons. For online accumulation, use `GeoLeapRuntime` or `B1Config` with `fixed_cache=False` and an explicit feedback/maintenance schedule.
 
+## Workflow template catalog
+
+The [catalog](datasets/workflow_catalog_v1/) contains **200 declared DAG templates**: 100 for multi-hop retrieval-augmented QA and 100 for text-to-SQL. Typed graph rewrites combine stage insertion, complementary strategy branches and joins, and bounded retrieval or execution-guided refinement. Stage organization draws on [DSPy BasicMultiHop](https://arxiv.org/html/2310.03714#S7) and [DIN-SQL](https://arxiv.org/abs/2304.11015); the templates are generated derivatives rather than original benchmark traces or reproductions of those methods.
+
+| Scenario | 3–10 nodes | 11–19 nodes | 20–29 nodes | 30–50 nodes | Total |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Retrieval-augmented QA | 70 | 20 | 7 | 3 | **100** |
+| Text-to-SQL | 70 | 20 | 7 | 3 | **100** |
+
+Both scenarios have a median of nine nodes. Within each scenario, exact directed graph-isomorphism checks exclude duplicate topology even when node names, operator labels or parameters differ. The catalog includes operator contracts, cache-region declarations, fixed generation settings, checksums, and [representative DAG diagrams](datasets/workflow_catalog_v1/EXAMPLES.md).
+
+```bash
+# Validate all 200 templates through the core using synthetic dataflow fixtures.
+python3 checks/check_workflow_catalog.py --output output/workflow_catalog/validation.json
+
+# Reproduce the catalog in a new directory; existing output is never overwritten.
+python3 scripts/generate_workflow_catalog.py --output output/workflow_catalog/reproduced
+```
+
+Validation checks structure, typed interfaces and complete state propagation without model, retrieval or database calls. Real services require explicit operator bindings. The larger DAGs support structure and scale stress tests; catalog validation does not establish benchmark quality, cost savings or parallel speedup. See the [catalog documentation](datasets/workflow_catalog_v1/README.md) for provenance and execution contracts.
+
 ## Validation
 
 The offline suite covers structure and boundary validation, qualification rules, planning choices, residency policies, record versions, memory-pressure rollback, encoder isolation, and actual state restoration.
@@ -175,7 +196,7 @@ Functional checks establish code-path behavior under their fixtures. They do not
 - **Explicit resource semantics.** Serialized-storage limits and the optional Python-object ledger are distinct. The ledger does not establish a complete cache-only physical-memory or process-RSS bound. Native allocations, allocator behavior, and unregistered temporaries have separate accounting requirements. See the [memory interface](doc/cache_memory.md).
 - **Application-supplied service profiles.** Operator latency and cost fields are planning/accounting inputs. They are not measured service latencies or API invoices. External integrations own service invocation, measurement, and billing reconciliation.
 
-This core release does not include benchmark adapters, datasets, deployment profiles, model weights, experiment logs, or benchmark results. `LegacyDensity` implements an independent-value density policy within the shared record-management framework.
+The release includes generated workflow declarations; benchmark adapters, benchmark records, deployment profiles, model weights, experiment logs, and benchmark results remain outside its scope. `LegacyDensity` implements an independent-value density policy within the shared record-management framework.
 
 ## Repository layout
 
@@ -183,6 +204,9 @@ This core release does not include benchmark adapters, datasets, deployment prof
 src/workflow/                Workflow contracts, B/C/D components, and runtime
 checks/                     Offline functional checks and local fixtures
 examples/core_demo.py        Minimal workflow execution
+datasets/workflow_catalog_v1/  100 QA and 100 SQL DAG templates
+scripts/workflow_catalog_*.py  Topology checks and core compiler
+scripts/generate_workflow_catalog.py  Reproducible template generator
 doc/cache_memory.md         Memory accounting and ownership contracts
 PUBLICATION_MANIFEST.json   File inventory and SHA-256 checksums
 ```

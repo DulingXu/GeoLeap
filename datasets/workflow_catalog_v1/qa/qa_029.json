@@ -1,0 +1,419 @@
+{
+  "cache_regions": [
+    {
+      "name": "region_001",
+      "nodes": [
+        "n001"
+      ]
+    },
+    {
+      "name": "region_002",
+      "nodes": [
+        "n002"
+      ]
+    },
+    {
+      "name": "region_003",
+      "nodes": [
+        "n003"
+      ]
+    },
+    {
+      "name": "region_004",
+      "nodes": [
+        "n004"
+      ]
+    },
+    {
+      "name": "region_005",
+      "nodes": [
+        "n005"
+      ]
+    },
+    {
+      "name": "region_006",
+      "nodes": [
+        "n006"
+      ]
+    },
+    {
+      "name": "region_007",
+      "nodes": [
+        "n007"
+      ]
+    },
+    {
+      "name": "region_008",
+      "nodes": [
+        "n001",
+        "n002"
+      ]
+    }
+  ],
+  "edges": [
+    [
+      "n001",
+      "n002"
+    ],
+    [
+      "n002",
+      "n003"
+    ],
+    [
+      "n002",
+      "n004"
+    ],
+    [
+      "n002",
+      "n005"
+    ],
+    [
+      "n002",
+      "n006"
+    ],
+    [
+      "n005",
+      "n007"
+    ],
+    [
+      "n006",
+      "n007"
+    ],
+    [
+      "n003",
+      "n008"
+    ],
+    [
+      "n004",
+      "n008"
+    ],
+    [
+      "n007",
+      "n008"
+    ]
+  ],
+  "execution_contract": {
+    "guards": [
+      "resource_version",
+      "model_version"
+    ],
+    "initial_fields": {
+      "model_version": "string",
+      "question": "string",
+      "resource_version": "string"
+    },
+    "profile_cost_and_latency": "unspecified; compiler defaults zero, never measured costs",
+    "real_operator_bindings": "explicit injection required; not provided by this generator",
+    "reference_answers_available_to_service_nodes": false,
+    "resource_resolution": "Bindings resolve immutable corpus/schema/database snapshots from resource_version.",
+    "scheduler": "current GeoLeapRuntime is serial"
+  },
+  "generation": {
+    "candidate_number": 53,
+    "deduplication": "Exact directed isomorphism ignoring IDs, operator names and parameters; signature is only a bucket key.",
+    "history_node_ids": "construction-time IDs; final IDs are renumbered",
+    "limits": {
+      "max_antichain_width": 8,
+      "max_branch_fanout": 4,
+      "max_nodes": 50,
+      "max_parent_count": 4,
+      "max_retrievals_per_path": 4,
+      "max_same_operator_per_path": 2,
+      "max_sql_repairs_per_path": 2
+    },
+    "node_budget": 8,
+    "rules": [
+      {
+        "rule": "seed",
+        "variant": "single_hop_rag"
+      },
+      {
+        "branch_roles": [
+          "direct_evidence",
+          "decomposed_reasoning",
+          "constraint_first"
+        ],
+        "new_nodes": [
+          "n004",
+          "n005",
+          "n006",
+          "n007"
+        ],
+        "operator": "qa.answer",
+        "replaced_node": "n003",
+        "rule": "strategy_fork_explicit_join"
+      },
+      {
+        "branch_roles": [
+          "direct_evidence",
+          "cross_checked_reasoning"
+        ],
+        "new_nodes": [
+          "n008",
+          "n009",
+          "n010"
+        ],
+        "operator": "qa.answer",
+        "replaced_node": "n004",
+        "rule": "strategy_fork_explicit_join"
+      }
+    ],
+    "scenario_rng_seed": 20261111,
+    "seed": 20261111,
+    "size_stratum": "small",
+    "topology_bucket_key": "dag-wl-v1:6a1b2d911df4bcf6a0539e2ff99f3243e50ca4199a86beabb75c865d5e1d0c37"
+  },
+  "metrics": {
+    "branched": true,
+    "cache_region_count": 8,
+    "edge_count": 10,
+    "generation_sizes": [
+      1,
+      1,
+      4,
+      1,
+      1
+    ],
+    "longest_path_edges": 4,
+    "longest_path_nodes": 5,
+    "max_generation_width": 4,
+    "max_in_degree": 3,
+    "max_out_degree": 4,
+    "maximum_antichain_width": 4,
+    "node_count": 8,
+    "operator_counts": {
+      "qa.answer": 4,
+      "qa.query_plan": 1,
+      "qa.retrieve": 1,
+      "qa.select_answer": 2
+    },
+    "operator_kind_counts": {
+      "LLM": 7,
+      "Tool": 1
+    },
+    "rejected_cache_region_candidates": 1,
+    "root_count": 1,
+    "roots": [
+      "n001"
+    ],
+    "sink_count": 1,
+    "sinks": [
+      "n008"
+    ],
+    "topological_order": [
+      "n001",
+      "n002",
+      "n003",
+      "n004",
+      "n005",
+      "n006",
+      "n007",
+      "n008"
+    ],
+    "weak_component_count": 1
+  },
+  "nodes": [
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [],
+      "id": "n001",
+      "kind": "LLM",
+      "operator": "qa.query_plan",
+      "output_field": "n001__payload",
+      "output_type": "qa.query_plan",
+      "parameters": {
+        "role": "default"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n001"
+      ],
+      "id": "n002",
+      "kind": "Tool",
+      "operator": "qa.retrieve",
+      "output_field": "n002__payload",
+      "output_type": "qa.evidence",
+      "parameters": {
+        "role": "entity_anchor"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n002"
+      ],
+      "id": "n003",
+      "kind": "LLM",
+      "operator": "qa.answer",
+      "output_field": "n003__payload",
+      "output_type": "qa.answer",
+      "parameters": {
+        "role": "decomposed_reasoning"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n002"
+      ],
+      "id": "n004",
+      "kind": "LLM",
+      "operator": "qa.answer",
+      "output_field": "n004__payload",
+      "output_type": "qa.answer",
+      "parameters": {
+        "role": "constraint_first"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n002"
+      ],
+      "id": "n005",
+      "kind": "LLM",
+      "operator": "qa.answer",
+      "output_field": "n005__payload",
+      "output_type": "qa.answer",
+      "parameters": {
+        "role": "direct_evidence"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n002"
+      ],
+      "id": "n006",
+      "kind": "LLM",
+      "operator": "qa.answer",
+      "output_field": "n006__payload",
+      "output_type": "qa.answer",
+      "parameters": {
+        "role": "cross_checked_reasoning"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n005",
+        "n006"
+      ],
+      "id": "n007",
+      "kind": "LLM",
+      "operator": "qa.select_answer",
+      "output_field": "n007__payload",
+      "output_type": "qa.answer",
+      "parameters": {
+        "role": "default"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n003",
+        "n004",
+        "n007"
+      ],
+      "id": "n008",
+      "kind": "LLM",
+      "operator": "qa.select_answer",
+      "output_field": "n008__payload",
+      "output_type": "qa.answer",
+      "parameters": {
+        "role": "default"
+      },
+      "terminal": true
+    }
+  ],
+  "operator_contracts": {
+    "qa.answer": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Answer the current question using all parent evidence artifacts.",
+      "input_types": [
+        "qa.evidence"
+      ],
+      "kind": "LLM",
+      "max_inputs": 4,
+      "min_inputs": 1,
+      "output_type": "qa.answer",
+      "required_data": {
+        "answer": "string",
+        "documents": "array"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "qa.query_plan": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Plan an initial evidence query from the current question; initialize carried documents to an empty list.",
+      "input_types": [],
+      "kind": "LLM",
+      "max_inputs": 0,
+      "min_inputs": 0,
+      "output_type": "qa.query_plan",
+      "required_data": {
+        "documents": "array",
+        "queries": "array"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "qa.retrieve": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Retrieve real passages using the declared strategy; merge carried documents with new passages and retain provenance.",
+      "input_types": [
+        "qa.query_plan"
+      ],
+      "kind": "Tool",
+      "max_inputs": 1,
+      "min_inputs": 1,
+      "output_type": "qa.evidence",
+      "required_data": {
+        "documents": "array"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "qa.select_answer": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Compare all candidate answers and their retained evidence.",
+      "input_types": [
+        "qa.answer"
+      ],
+      "kind": "LLM",
+      "max_inputs": 4,
+      "min_inputs": 2,
+      "output_type": "qa.answer",
+      "required_data": {
+        "answer": "string",
+        "documents": "array"
+      },
+      "side_effects": "none; resource access must be read-only"
+    }
+  },
+  "provenance": {
+    "base_method": "basic_multihop",
+    "benchmark_tasks_used_during_generation": false,
+    "category": "constrained_generated_derivative",
+    "note": "Shorter variants omit stages; fork/join and bounded refinements extend the cited stage organization.",
+    "original_method_reproduction": false,
+    "stage_aligned_reference": false
+  },
+  "scenario": "qa",
+  "template_id": "qa_029",
+  "validation": {
+    "fixture_execution": "pending_independent_validation",
+    "performance_evaluation": "not_run",
+    "real_service_execution": "not_run",
+    "structure_validated": true,
+    "task_quality_evaluation": "not_run"
+  },
+  "version": "geoleap-typed-dag-v1"
+}

@@ -1,0 +1,317 @@
+{
+  "cache_regions": [
+    {
+      "name": "region_001",
+      "nodes": [
+        "n001"
+      ]
+    },
+    {
+      "name": "region_002",
+      "nodes": [
+        "n002"
+      ]
+    },
+    {
+      "name": "region_003",
+      "nodes": [
+        "n003"
+      ]
+    },
+    {
+      "name": "region_004",
+      "nodes": [
+        "n004"
+      ]
+    }
+  ],
+  "edges": [
+    [
+      "n001",
+      "n002"
+    ],
+    [
+      "n001",
+      "n003"
+    ],
+    [
+      "n002",
+      "n004"
+    ],
+    [
+      "n003",
+      "n004"
+    ],
+    [
+      "n004",
+      "n005"
+    ]
+  ],
+  "execution_contract": {
+    "guards": [
+      "resource_version",
+      "model_version"
+    ],
+    "initial_fields": {
+      "model_version": "string",
+      "question": "string",
+      "resource_version": "string"
+    },
+    "profile_cost_and_latency": "unspecified; compiler defaults zero, never measured costs",
+    "real_operator_bindings": "explicit injection required; not provided by this generator",
+    "reference_answers_available_to_service_nodes": false,
+    "resource_resolution": "Bindings resolve immutable corpus/schema/database snapshots from resource_version.",
+    "scheduler": "current GeoLeapRuntime is serial"
+  },
+  "generation": {
+    "candidate_number": 14,
+    "deduplication": "Exact directed isomorphism ignoring IDs, operator names and parameters; signature is only a bucket key.",
+    "history_node_ids": "construction-time IDs; final IDs are renumbered",
+    "limits": {
+      "max_antichain_width": 8,
+      "max_branch_fanout": 4,
+      "max_nodes": 50,
+      "max_parent_count": 4,
+      "max_retrievals_per_path": 4,
+      "max_same_operator_per_path": 2,
+      "max_sql_repairs_per_path": 2
+    },
+    "node_budget": 5,
+    "rules": [
+      {
+        "rule": "seed",
+        "variant": "reduced_din_sql"
+      },
+      {
+        "new_nodes": [
+          "n004"
+        ],
+        "operators": [
+          "sql.prune_schema"
+        ],
+        "replaced_edge": [
+          "n001",
+          "n002"
+        ],
+        "rule": "typed_stage_insertion"
+      },
+      {
+        "branch_roles": [
+          "projection_columns",
+          "filter_columns"
+        ],
+        "new_nodes": [
+          "n005",
+          "n006"
+        ],
+        "operator": "sql.prune_schema",
+        "replaced_node": "n004",
+        "rule": "strategy_fork_fused_join"
+      }
+    ],
+    "scenario_rng_seed": 21261114,
+    "seed": 20261111,
+    "size_stratum": "small",
+    "topology_bucket_key": "dag-wl-v1:c954ffe737229f6fc09e138f7a487b03bef8bc3271b2e4a3b4199d06f667b313"
+  },
+  "metrics": {
+    "branched": true,
+    "cache_region_count": 4,
+    "edge_count": 5,
+    "generation_sizes": [
+      1,
+      2,
+      1,
+      1
+    ],
+    "longest_path_edges": 3,
+    "longest_path_nodes": 4,
+    "max_generation_width": 2,
+    "max_in_degree": 2,
+    "max_out_degree": 2,
+    "maximum_antichain_width": 2,
+    "node_count": 5,
+    "operator_counts": {
+      "sql.generate": 1,
+      "sql.prune_schema": 2,
+      "sql.schema_linking": 1,
+      "sql.self_correct": 1
+    },
+    "operator_kind_counts": {
+      "LLM": 5
+    },
+    "rejected_cache_region_candidates": 1,
+    "root_count": 1,
+    "roots": [
+      "n001"
+    ],
+    "sink_count": 1,
+    "sinks": [
+      "n005"
+    ],
+    "topological_order": [
+      "n001",
+      "n002",
+      "n003",
+      "n004",
+      "n005"
+    ],
+    "weak_component_count": 1
+  },
+  "nodes": [
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [],
+      "id": "n001",
+      "kind": "LLM",
+      "operator": "sql.schema_linking",
+      "output_field": "n001__payload",
+      "output_type": "sql.context",
+      "parameters": {
+        "role": "default"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n001"
+      ],
+      "id": "n002",
+      "kind": "LLM",
+      "operator": "sql.prune_schema",
+      "output_field": "n002__payload",
+      "output_type": "sql.context",
+      "parameters": {
+        "role": "projection_columns"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n001"
+      ],
+      "id": "n003",
+      "kind": "LLM",
+      "operator": "sql.prune_schema",
+      "output_field": "n003__payload",
+      "output_type": "sql.context",
+      "parameters": {
+        "role": "filter_columns"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n002",
+        "n003"
+      ],
+      "id": "n004",
+      "kind": "LLM",
+      "operator": "sql.generate",
+      "output_field": "n004__payload",
+      "output_type": "sql.candidate",
+      "parameters": {
+        "role": "direct"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n004"
+      ],
+      "id": "n005",
+      "kind": "LLM",
+      "operator": "sql.self_correct",
+      "output_field": "n005__payload",
+      "output_type": "sql.answer",
+      "parameters": {
+        "role": "default"
+      },
+      "terminal": true
+    }
+  ],
+  "operator_contracts": {
+    "sql.generate": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Generate one candidate SQL using every parent context.",
+      "input_types": [
+        "sql.context"
+      ],
+      "kind": "LLM",
+      "max_inputs": 4,
+      "min_inputs": 1,
+      "output_type": "sql.candidate",
+      "required_data": {
+        "schema_context": "object",
+        "sql": "string"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "sql.prune_schema": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Annotate selected schema elements for a relational concern; retain immutable base schema and join keys rather than destructively removing them.",
+      "input_types": [
+        "sql.context"
+      ],
+      "kind": "LLM",
+      "max_inputs": 1,
+      "min_inputs": 1,
+      "output_type": "sql.context",
+      "required_data": {
+        "schema_context": "object"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "sql.schema_linking": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Link the current question to a fixed database schema and evidence.",
+      "input_types": [],
+      "kind": "LLM",
+      "max_inputs": 0,
+      "min_inputs": 0,
+      "output_type": "sql.context",
+      "required_data": {
+        "schema_context": "object"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "sql.self_correct": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Review and correct the selected SQL against the current task and schema.",
+      "input_types": [
+        "sql.candidate",
+        "sql.checked"
+      ],
+      "kind": "LLM",
+      "max_inputs": 1,
+      "min_inputs": 1,
+      "output_type": "sql.answer",
+      "required_data": {
+        "sql": "string"
+      },
+      "side_effects": "none; resource access must be read-only"
+    }
+  },
+  "provenance": {
+    "base_method": "din_sql",
+    "benchmark_tasks_used_during_generation": false,
+    "category": "constrained_generated_derivative",
+    "note": "Shorter variants omit stages; fork/join and bounded refinements extend the cited stage organization.",
+    "original_method_reproduction": false,
+    "stage_aligned_reference": false
+  },
+  "scenario": "sql",
+  "template_id": "sql_006",
+  "validation": {
+    "fixture_execution": "pending_independent_validation",
+    "performance_evaluation": "not_run",
+    "real_service_execution": "not_run",
+    "structure_validated": true,
+    "task_quality_evaluation": "not_run"
+  },
+  "version": "geoleap-typed-dag-v1"
+}

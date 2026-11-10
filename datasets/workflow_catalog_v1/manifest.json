@@ -1,0 +1,1477 @@
+{
+  "code_sha256": {
+    "checks/check_workflow_catalog.py": "3af8d17d5bc4666936a29ed74b83cd970ec23a70946aee6298471f2cda5f3c19",
+    "checks/check_workflow_catalog_topology.py": "0d5ccbf1047f4d1a12e4eb8b95e3362c4ab14835a0a1d044228029f790e44bf6",
+    "scripts/generate_workflow_catalog.py": "3ac9458ba7e13eb487ce6f80dc1f243e03ec3e153e66f0296661ef632835fca2",
+    "scripts/workflow_catalog_runtime.py": "86302e8a728fe99dd0855c9e8003a914f35f63378e64f78e6d999a53b1f372b2",
+    "scripts/workflow_catalog_topology.py": "8b35bfc8b984a078eb2b7a3112c8211bf28b4dbe2f38f788c1466878a7535b93"
+  },
+  "fallback_rule": "After 350 unsuccessful attempts for a requested size, sample uniformly within the frozen stratum (small: 7–10); fail after 6000 attempts.",
+  "generation_selection": "Seeded grammar sampling, typed validity and exact topology uniqueness only; no outcome-based selection.",
+  "limits": {
+    "max_antichain_width": 8,
+    "max_branch_fanout": 4,
+    "max_nodes": 50,
+    "max_parent_count": 4,
+    "max_retrievals_per_path": 4,
+    "max_same_operator_per_path": 2,
+    "max_sql_repairs_per_path": 2
+  },
+  "scenario_count": 2,
+  "seed": 20261111,
+  "size_quotas_per_scenario": [
+    {
+      "count": 70,
+      "max": 10,
+      "min": 3,
+      "stratum": "small"
+    },
+    {
+      "count": 20,
+      "max": 19,
+      "min": 11,
+      "stratum": "medium"
+    },
+    {
+      "count": 7,
+      "max": 29,
+      "min": 20,
+      "stratum": "large"
+    },
+    {
+      "count": 3,
+      "max": 50,
+      "min": 30,
+      "stratum": "extra_large"
+    }
+  ],
+  "small_size_schedule": {
+    "10": 16,
+    "3": 1,
+    "4": 2,
+    "5": 4,
+    "6": 7,
+    "7": 10,
+    "8": 14,
+    "9": 16
+  },
+  "sources": {
+    "basic_multihop": {
+      "code": "https://github.com/stanfordnlp/dspy/blob/e08bf0e4635764839800bd9bde17f472128433dc/tests/examples/test_baleen.py",
+      "paper": "https://arxiv.org/html/2310.03714#S7",
+      "title": "DSPy BasicMultiHop / SimplifiedBaleen",
+      "use": "Query generation, retrieval, answer stages; generated branches are our extensions."
+    },
+    "din_sql": {
+      "code": "https://github.com/MohammadrezaPourreza/Few-shot-NL2SQL-with-prompting/blob/79842fdfcba7598c1a69873348649d6b0dbbb551/DIN-SQL_BIRD.py",
+      "paper": "https://arxiv.org/abs/2304.11015",
+      "title": "DIN-SQL",
+      "use": "Schema linking, classification/decomposition, generation, self-correction stages; execution-guided repair is our extension."
+    }
+  },
+  "template_count": 200,
+  "templates": [
+    {
+      "node_count": 3,
+      "path": "qa/qa_001.json",
+      "scenario": "qa",
+      "sha256": "6b91385ad4be4b30cbbd7c0aa966df1c02f1177819b1c7535fdb526008210d47",
+      "template_id": "qa_001"
+    },
+    {
+      "node_count": 4,
+      "path": "qa/qa_002.json",
+      "scenario": "qa",
+      "sha256": "5bb693e87e0d41c321fbba8afe39c722ed5472c3323448df4d7c1ae16695ddf4",
+      "template_id": "qa_002"
+    },
+    {
+      "node_count": 4,
+      "path": "qa/qa_003.json",
+      "scenario": "qa",
+      "sha256": "beb0348aacd5d20136b585f5ee9c6bf097b4165548bf10d6ec701f1b3783a669",
+      "template_id": "qa_003"
+    },
+    {
+      "node_count": 5,
+      "path": "qa/qa_004.json",
+      "scenario": "qa",
+      "sha256": "1569ad1aac306d73d4411360d0d276f6bc2eaec15ad196bb3fcd9057d2628b0e",
+      "template_id": "qa_004"
+    },
+    {
+      "node_count": 5,
+      "path": "qa/qa_005.json",
+      "scenario": "qa",
+      "sha256": "6060a29cd05bf248d69c830847f515278927933e9dcebf59ddae0ab4aeaf9e6f",
+      "template_id": "qa_005"
+    },
+    {
+      "node_count": 5,
+      "path": "qa/qa_006.json",
+      "scenario": "qa",
+      "sha256": "023f66a378b6dbc066b3a4c7566d5ee247d40b07c93c06514ae506023871fc91",
+      "template_id": "qa_006"
+    },
+    {
+      "node_count": 5,
+      "path": "qa/qa_007.json",
+      "scenario": "qa",
+      "sha256": "d0b0c1e33366383f05cafcf1ad92be34a531113107dcca695bd2c1ebcea0cf4b",
+      "template_id": "qa_007"
+    },
+    {
+      "node_count": 6,
+      "path": "qa/qa_008.json",
+      "scenario": "qa",
+      "sha256": "93e84f680cb5820adc7d9e86824b978f7ee12354c9beeee93cb5e0c299c93b4a",
+      "template_id": "qa_008"
+    },
+    {
+      "node_count": 6,
+      "path": "qa/qa_009.json",
+      "scenario": "qa",
+      "sha256": "d063bc8eba1b793ed20b7330fe71ad5ffe0dcf8e0a8ee633ef2d9d865e65fdbc",
+      "template_id": "qa_009"
+    },
+    {
+      "node_count": 6,
+      "path": "qa/qa_010.json",
+      "scenario": "qa",
+      "sha256": "ed054ffd0190c5c487b7398618dd31b3bb0d0a68b7ee02137caf15d1c98a8ac5",
+      "template_id": "qa_010"
+    },
+    {
+      "node_count": 6,
+      "path": "qa/qa_011.json",
+      "scenario": "qa",
+      "sha256": "4b127de5856b92dbdc89a715f0864d4fe9f13cd0b5e95484c43acf30cc4f8b6d",
+      "template_id": "qa_011"
+    },
+    {
+      "node_count": 6,
+      "path": "qa/qa_012.json",
+      "scenario": "qa",
+      "sha256": "ed09c72385be7371edd662bb8109e398d6fa08309f8fed31c9ad80f61f13594a",
+      "template_id": "qa_012"
+    },
+    {
+      "node_count": 6,
+      "path": "qa/qa_013.json",
+      "scenario": "qa",
+      "sha256": "76c72d2bd6043b365adc99bc2c1d2a7e37f9c6c7664643aeaa23160cc5273ceb",
+      "template_id": "qa_013"
+    },
+    {
+      "node_count": 6,
+      "path": "qa/qa_014.json",
+      "scenario": "qa",
+      "sha256": "0e9d33c588381d673aae74135be767887b627789c680c525920777eaaad37120",
+      "template_id": "qa_014"
+    },
+    {
+      "node_count": 7,
+      "path": "qa/qa_015.json",
+      "scenario": "qa",
+      "sha256": "1191c9b53b17d3b535e4af08a13bacb7eceb1f4a4fb189ee3d42dff31dbc36ab",
+      "template_id": "qa_015"
+    },
+    {
+      "node_count": 7,
+      "path": "qa/qa_016.json",
+      "scenario": "qa",
+      "sha256": "e26c9ac2824c6040d2b90808f1d62446a88224e46e3daaf2fa237b93d943c7a2",
+      "template_id": "qa_016"
+    },
+    {
+      "node_count": 7,
+      "path": "qa/qa_017.json",
+      "scenario": "qa",
+      "sha256": "48f387a7f4254287c0cd4bfb49891fa2b4ce85fdb3dca57bcccf7169c5a43dc0",
+      "template_id": "qa_017"
+    },
+    {
+      "node_count": 7,
+      "path": "qa/qa_018.json",
+      "scenario": "qa",
+      "sha256": "56d94de02f00746f7f4c0dbcb4a0b683ccfde787a2711306b0e00f8cd529ea13",
+      "template_id": "qa_018"
+    },
+    {
+      "node_count": 7,
+      "path": "qa/qa_019.json",
+      "scenario": "qa",
+      "sha256": "73812f36503ff88af0fe460c021cf2d19b491af50acf9cfa7eb40a933242f066",
+      "template_id": "qa_019"
+    },
+    {
+      "node_count": 7,
+      "path": "qa/qa_020.json",
+      "scenario": "qa",
+      "sha256": "7da3b64fa88f85b9eb47b991cebbc62c66eff79150122b60ab51ca89be8f5c53",
+      "template_id": "qa_020"
+    },
+    {
+      "node_count": 7,
+      "path": "qa/qa_021.json",
+      "scenario": "qa",
+      "sha256": "745adb859e9a084931bd3db6cb6a5c9df54b8257ec441c322cd95832c117c2a1",
+      "template_id": "qa_021"
+    },
+    {
+      "node_count": 7,
+      "path": "qa/qa_022.json",
+      "scenario": "qa",
+      "sha256": "281cd0f0088aee64917b60ab53c8326bb1e2a88ddccc2264a98f09583649ee93",
+      "template_id": "qa_022"
+    },
+    {
+      "node_count": 7,
+      "path": "qa/qa_023.json",
+      "scenario": "qa",
+      "sha256": "54c2af42e89763acaa54b8823b758ecf0d9411acfcca3d9a84115abc10872502",
+      "template_id": "qa_023"
+    },
+    {
+      "node_count": 7,
+      "path": "qa/qa_024.json",
+      "scenario": "qa",
+      "sha256": "113136d31bcdac7ead41539d08bd85a00786edb3f87d680649e271c30b45562b",
+      "template_id": "qa_024"
+    },
+    {
+      "node_count": 8,
+      "path": "qa/qa_025.json",
+      "scenario": "qa",
+      "sha256": "ae08e65461b3c4997e9459da08c83b8b56542858adc6f86fff5b48a610f667d9",
+      "template_id": "qa_025"
+    },
+    {
+      "node_count": 8,
+      "path": "qa/qa_026.json",
+      "scenario": "qa",
+      "sha256": "3fbe44c35de418f38b6b97c9632fb675591e8462e0d4d890721c1a3e51057697",
+      "template_id": "qa_026"
+    },
+    {
+      "node_count": 8,
+      "path": "qa/qa_027.json",
+      "scenario": "qa",
+      "sha256": "52389b583e7d2bb57d30b98b85e9de2ada3c34769fd13cb58605ab884762a4a7",
+      "template_id": "qa_027"
+    },
+    {
+      "node_count": 8,
+      "path": "qa/qa_028.json",
+      "scenario": "qa",
+      "sha256": "319f0fc476e84c8a288bb9e7523316d9a03a5a803252f56970528feac4c913b8",
+      "template_id": "qa_028"
+    },
+    {
+      "node_count": 8,
+      "path": "qa/qa_029.json",
+      "scenario": "qa",
+      "sha256": "59af650667eac7419abda53d51bc3dd44123458f26d1227b44590ff465609741",
+      "template_id": "qa_029"
+    },
+    {
+      "node_count": 8,
+      "path": "qa/qa_030.json",
+      "scenario": "qa",
+      "sha256": "6879f784c6f2f3a9c9790b278c647e2d649e70769c234d489ddefcbdd86a5cd9",
+      "template_id": "qa_030"
+    },
+    {
+      "node_count": 8,
+      "path": "qa/qa_031.json",
+      "scenario": "qa",
+      "sha256": "d05124fc994b7c7e48fce81a3b9ee162c54f9125ad917a45628b1bb5d96d05b8",
+      "template_id": "qa_031"
+    },
+    {
+      "node_count": 8,
+      "path": "qa/qa_032.json",
+      "scenario": "qa",
+      "sha256": "2f067ded7194929f64aaec306cc795c5e0acbebbc6bdccdaa69b032342a1179d",
+      "template_id": "qa_032"
+    },
+    {
+      "node_count": 8,
+      "path": "qa/qa_033.json",
+      "scenario": "qa",
+      "sha256": "e3a646d5c7c0facce026a8717cae3aeb9bcbdad51295a2fbb0fdea405ec53be5",
+      "template_id": "qa_033"
+    },
+    {
+      "node_count": 8,
+      "path": "qa/qa_034.json",
+      "scenario": "qa",
+      "sha256": "c3b295405e75524d92597a589f899c42c90272cd20444b24cc9dfdfd26156aa4",
+      "template_id": "qa_034"
+    },
+    {
+      "node_count": 8,
+      "path": "qa/qa_035.json",
+      "scenario": "qa",
+      "sha256": "7a5a01d3183bde1e438c7c2ab4249bba1a3768aacedf8e51272ea1ebc6324682",
+      "template_id": "qa_035"
+    },
+    {
+      "node_count": 8,
+      "path": "qa/qa_036.json",
+      "scenario": "qa",
+      "sha256": "eff0eb9a05345bbff661a24f0257c93f7fc3a641bf1791a9dda6050679fa2880",
+      "template_id": "qa_036"
+    },
+    {
+      "node_count": 8,
+      "path": "qa/qa_037.json",
+      "scenario": "qa",
+      "sha256": "6b437ead424c9ce3400c4d7257fd775fd419808547f5a29661192ab99dd9d75c",
+      "template_id": "qa_037"
+    },
+    {
+      "node_count": 8,
+      "path": "qa/qa_038.json",
+      "scenario": "qa",
+      "sha256": "8c50c101c30e7f4866bd4eeb2718ec911ec573539d6d841b94068a73c6e9d06b",
+      "template_id": "qa_038"
+    },
+    {
+      "node_count": 9,
+      "path": "qa/qa_039.json",
+      "scenario": "qa",
+      "sha256": "634e5c52143da986ab3de47079c943e54b3ea5529762efd88618cdc60b7cc8c6",
+      "template_id": "qa_039"
+    },
+    {
+      "node_count": 9,
+      "path": "qa/qa_040.json",
+      "scenario": "qa",
+      "sha256": "d63d430fd2fadbe82c9847e4e449ddbc199b451fdb5be2ef751442f1d3e29508",
+      "template_id": "qa_040"
+    },
+    {
+      "node_count": 9,
+      "path": "qa/qa_041.json",
+      "scenario": "qa",
+      "sha256": "b087fa598fd41566375fef406bd3ab8ea80d21f99220c85aee479168b3e31ef5",
+      "template_id": "qa_041"
+    },
+    {
+      "node_count": 9,
+      "path": "qa/qa_042.json",
+      "scenario": "qa",
+      "sha256": "b1ba3be93821bc7cfff66e3542168a6e66d271c41d1ec72f1aaac0c9982868b4",
+      "template_id": "qa_042"
+    },
+    {
+      "node_count": 9,
+      "path": "qa/qa_043.json",
+      "scenario": "qa",
+      "sha256": "403aa279689f2bc0b3c3706c00c08436f82c2360a725c5d132740885a78e7584",
+      "template_id": "qa_043"
+    },
+    {
+      "node_count": 9,
+      "path": "qa/qa_044.json",
+      "scenario": "qa",
+      "sha256": "3a0276020400c2fefb53dd8c0ef29b8a270a5d7734888c90cacee5c477c7d1d1",
+      "template_id": "qa_044"
+    },
+    {
+      "node_count": 9,
+      "path": "qa/qa_045.json",
+      "scenario": "qa",
+      "sha256": "4d5802627009b1938d7856a7e57e9810a31ef062825a7f5318ccb935685d571f",
+      "template_id": "qa_045"
+    },
+    {
+      "node_count": 9,
+      "path": "qa/qa_046.json",
+      "scenario": "qa",
+      "sha256": "fd5d22dd3d9c015d7c53627378222c503474fc77298ea73317619079ab7cc52f",
+      "template_id": "qa_046"
+    },
+    {
+      "node_count": 9,
+      "path": "qa/qa_047.json",
+      "scenario": "qa",
+      "sha256": "14ab03737b2fcd268f87214daf8211a9d784d7c76443046a11a76b0f8f316f33",
+      "template_id": "qa_047"
+    },
+    {
+      "node_count": 9,
+      "path": "qa/qa_048.json",
+      "scenario": "qa",
+      "sha256": "7ad69a3342ab0cdeb4fec5b8e6bcdcf1422b391e5504eb7cd7914b32d4b458d4",
+      "template_id": "qa_048"
+    },
+    {
+      "node_count": 9,
+      "path": "qa/qa_049.json",
+      "scenario": "qa",
+      "sha256": "be7efbb188826849c27fc1d2d1bf320c541c4db00e2ba2b8d6c42b3769244cee",
+      "template_id": "qa_049"
+    },
+    {
+      "node_count": 9,
+      "path": "qa/qa_050.json",
+      "scenario": "qa",
+      "sha256": "117e9d8ef4c6319524bc389884e6d2779b1b4e1caf2f643c148f660eead8c83e",
+      "template_id": "qa_050"
+    },
+    {
+      "node_count": 9,
+      "path": "qa/qa_051.json",
+      "scenario": "qa",
+      "sha256": "b82a35d04adc96226bc17861ea9eeaca2411fc4ef444faf07c554aef16bdef89",
+      "template_id": "qa_051"
+    },
+    {
+      "node_count": 9,
+      "path": "qa/qa_052.json",
+      "scenario": "qa",
+      "sha256": "d53cc25dd43352aba23c4598acd85ad9104d86abc6e274330690b52606150584",
+      "template_id": "qa_052"
+    },
+    {
+      "node_count": 9,
+      "path": "qa/qa_053.json",
+      "scenario": "qa",
+      "sha256": "77e2c02d950c4449f3a1c2fcd69d1a46639defe273b7d67af5265eec2139ee05",
+      "template_id": "qa_053"
+    },
+    {
+      "node_count": 9,
+      "path": "qa/qa_054.json",
+      "scenario": "qa",
+      "sha256": "a9a1a27365293ca18ff50c10fec72dd67f1f1a8a272508be12eff90053ba6c2d",
+      "template_id": "qa_054"
+    },
+    {
+      "node_count": 10,
+      "path": "qa/qa_055.json",
+      "scenario": "qa",
+      "sha256": "ddfcca97efce1b7bdedd5128c2a333bbc665342ca427d5c171b64ce679545f86",
+      "template_id": "qa_055"
+    },
+    {
+      "node_count": 10,
+      "path": "qa/qa_056.json",
+      "scenario": "qa",
+      "sha256": "10c11f37a25e167a978757e07328999285bbd7cb35831ed900d91432bcde4a29",
+      "template_id": "qa_056"
+    },
+    {
+      "node_count": 10,
+      "path": "qa/qa_057.json",
+      "scenario": "qa",
+      "sha256": "9f736a5db7b2a357e1c688029543bf0ff4cdd1539df4af69f46abcdfaef0538f",
+      "template_id": "qa_057"
+    },
+    {
+      "node_count": 10,
+      "path": "qa/qa_058.json",
+      "scenario": "qa",
+      "sha256": "41293a677dd2c50a8d6f8df4832763574ec9feb6f67288eb9da6e0e93860928d",
+      "template_id": "qa_058"
+    },
+    {
+      "node_count": 10,
+      "path": "qa/qa_059.json",
+      "scenario": "qa",
+      "sha256": "65bb8a0f64572e20504bb9911227e31033d97f02afe0ae6860ce5190a99b65c6",
+      "template_id": "qa_059"
+    },
+    {
+      "node_count": 10,
+      "path": "qa/qa_060.json",
+      "scenario": "qa",
+      "sha256": "8f0ecd4594a23efe5b5917445459d273f04328ca4dbff99356ba877f229d1a05",
+      "template_id": "qa_060"
+    },
+    {
+      "node_count": 10,
+      "path": "qa/qa_061.json",
+      "scenario": "qa",
+      "sha256": "d82e04eb2f84d3909cef46a9c245f1d259361255f8eb7347d734f9e89e1d16cc",
+      "template_id": "qa_061"
+    },
+    {
+      "node_count": 10,
+      "path": "qa/qa_062.json",
+      "scenario": "qa",
+      "sha256": "532e764a3ad3a093a78337170e9847fb9fe0674a6ecf6e66659e51d8b1633559",
+      "template_id": "qa_062"
+    },
+    {
+      "node_count": 10,
+      "path": "qa/qa_063.json",
+      "scenario": "qa",
+      "sha256": "a23a97bbe1a3afa5bc55cc172ebe28fa78b5a47ca884800a46ed313b30a855f1",
+      "template_id": "qa_063"
+    },
+    {
+      "node_count": 10,
+      "path": "qa/qa_064.json",
+      "scenario": "qa",
+      "sha256": "4b0238bac0ae649f7bc8732c6432a693a136f07c994419e249568c72bafde81a",
+      "template_id": "qa_064"
+    },
+    {
+      "node_count": 10,
+      "path": "qa/qa_065.json",
+      "scenario": "qa",
+      "sha256": "36aca46f6a1e92b1689fc44f3d06fb9fd964d7c6a7141a5f77ca4a7ad9ab6520",
+      "template_id": "qa_065"
+    },
+    {
+      "node_count": 10,
+      "path": "qa/qa_066.json",
+      "scenario": "qa",
+      "sha256": "a1d61c0ceedbfa556f1c998a9605572e659650b36132849d6ff91a1dd279cbf2",
+      "template_id": "qa_066"
+    },
+    {
+      "node_count": 10,
+      "path": "qa/qa_067.json",
+      "scenario": "qa",
+      "sha256": "f0688e4c52381ea3ab6e47d7c49a1c68676f5d54135707343d0561d21c78a796",
+      "template_id": "qa_067"
+    },
+    {
+      "node_count": 10,
+      "path": "qa/qa_068.json",
+      "scenario": "qa",
+      "sha256": "58d897a6d9f985c92b83d8b9d0e72329bcee7daaed52c0be5c61b249d4de78eb",
+      "template_id": "qa_068"
+    },
+    {
+      "node_count": 10,
+      "path": "qa/qa_069.json",
+      "scenario": "qa",
+      "sha256": "a0b20a54bce01ac80a0721269aa69c6c5ce59808345e748901e950c0d0f5990d",
+      "template_id": "qa_069"
+    },
+    {
+      "node_count": 10,
+      "path": "qa/qa_070.json",
+      "scenario": "qa",
+      "sha256": "ffbea4e2dc907fe17841ab614e76f8fe12a8486021eb3fc0a8add41dc925c6b2",
+      "template_id": "qa_070"
+    },
+    {
+      "node_count": 11,
+      "path": "qa/qa_071.json",
+      "scenario": "qa",
+      "sha256": "2bd7ab78182bab75dde2210524de492e2edf72fd3dab6cfaefe65e06f6dc94c1",
+      "template_id": "qa_071"
+    },
+    {
+      "node_count": 13,
+      "path": "qa/qa_072.json",
+      "scenario": "qa",
+      "sha256": "fc3f5cfa6ebc20dec14576ba9086de909cdbd767c967beacfeec01e51692ff7a",
+      "template_id": "qa_072"
+    },
+    {
+      "node_count": 11,
+      "path": "qa/qa_073.json",
+      "scenario": "qa",
+      "sha256": "0a7a1f17cab6b2ba702c7637e0185a326cb865a7c2e47c169b26b0b27a0ce18d",
+      "template_id": "qa_073"
+    },
+    {
+      "node_count": 12,
+      "path": "qa/qa_074.json",
+      "scenario": "qa",
+      "sha256": "ca93a1efeab2018f03f5d8b264ed488711b61a7adf7d26f9a3d42db04fb9bdda",
+      "template_id": "qa_074"
+    },
+    {
+      "node_count": 18,
+      "path": "qa/qa_075.json",
+      "scenario": "qa",
+      "sha256": "4faa3b50087e18bb4f73823d6122037ea4367ce0cf5dea138719189af8d5d1d0",
+      "template_id": "qa_075"
+    },
+    {
+      "node_count": 12,
+      "path": "qa/qa_076.json",
+      "scenario": "qa",
+      "sha256": "47a02f588a255c4f83e56185e2227e6a3997381a903b298123d7208caf8e6245",
+      "template_id": "qa_076"
+    },
+    {
+      "node_count": 12,
+      "path": "qa/qa_077.json",
+      "scenario": "qa",
+      "sha256": "e41360f3d82f8ceebc3a3a6c08a4653bc2fde83774b2a220ec70e9577fae8bb1",
+      "template_id": "qa_077"
+    },
+    {
+      "node_count": 13,
+      "path": "qa/qa_078.json",
+      "scenario": "qa",
+      "sha256": "967874ff154be757de613778ac380760ef7714412dcd565e648a6fcd8260c072",
+      "template_id": "qa_078"
+    },
+    {
+      "node_count": 12,
+      "path": "qa/qa_079.json",
+      "scenario": "qa",
+      "sha256": "121e1351aa75fe456498dd8946909b2265a1feb81a2749285ded4e9d4eed46dc",
+      "template_id": "qa_079"
+    },
+    {
+      "node_count": 16,
+      "path": "qa/qa_080.json",
+      "scenario": "qa",
+      "sha256": "2d2427cc39396a574e01c212a4fa1bf38652d97bf97a7a9f8a942a5b681dd609",
+      "template_id": "qa_080"
+    },
+    {
+      "node_count": 19,
+      "path": "qa/qa_081.json",
+      "scenario": "qa",
+      "sha256": "19644bc480e9d1e17fe7fe2fbec0d5308dfc1d0b9c3ea033b39c4593aa069535",
+      "template_id": "qa_081"
+    },
+    {
+      "node_count": 11,
+      "path": "qa/qa_082.json",
+      "scenario": "qa",
+      "sha256": "eb8260f2f0fb00ac566b14aad81ee155a54fb5ad4e78816b3f9056b88631b5dd",
+      "template_id": "qa_082"
+    },
+    {
+      "node_count": 12,
+      "path": "qa/qa_083.json",
+      "scenario": "qa",
+      "sha256": "e982eca9b5916cf0f9e18c0ff939b0bf2f0507794a0c9c31bb863e805971e733",
+      "template_id": "qa_083"
+    },
+    {
+      "node_count": 19,
+      "path": "qa/qa_084.json",
+      "scenario": "qa",
+      "sha256": "d687369cd345db9a1d745876b3a59636e06095d45a36009387fc577338313e47",
+      "template_id": "qa_084"
+    },
+    {
+      "node_count": 14,
+      "path": "qa/qa_085.json",
+      "scenario": "qa",
+      "sha256": "26e6c56095f2acaac81e7f2ea9c7d4cda3e7ccea1ab31d4bb684bd20c957e1a5",
+      "template_id": "qa_085"
+    },
+    {
+      "node_count": 18,
+      "path": "qa/qa_086.json",
+      "scenario": "qa",
+      "sha256": "41f29bcc63b97dd4ba68bdb1712f1c73cfd3bfd9034aed3983df151093163dbc",
+      "template_id": "qa_086"
+    },
+    {
+      "node_count": 15,
+      "path": "qa/qa_087.json",
+      "scenario": "qa",
+      "sha256": "6ee597cd97320ad48fd164cbe1d8e8b560287ddaa2eb16a33b7198900bafdea6",
+      "template_id": "qa_087"
+    },
+    {
+      "node_count": 18,
+      "path": "qa/qa_088.json",
+      "scenario": "qa",
+      "sha256": "43565b9992964d4b08568132b938416b0da63d8b5ffc8e1eacecdedacd483dda",
+      "template_id": "qa_088"
+    },
+    {
+      "node_count": 12,
+      "path": "qa/qa_089.json",
+      "scenario": "qa",
+      "sha256": "72b74662127d151dbff824473fe465d3bbbe9ac7dd4e959d12ca5ce5987e9c58",
+      "template_id": "qa_089"
+    },
+    {
+      "node_count": 17,
+      "path": "qa/qa_090.json",
+      "scenario": "qa",
+      "sha256": "7554cba29c8046b760f7190dc0ff7ec4831b3e6072bdc9371cdd8fb1f1d99380",
+      "template_id": "qa_090"
+    },
+    {
+      "node_count": 26,
+      "path": "qa/qa_091.json",
+      "scenario": "qa",
+      "sha256": "e65bff8f85dc921ad28fb16cd255e0238e60ff9948c9bd7b4d925d50a64a9e7b",
+      "template_id": "qa_091"
+    },
+    {
+      "node_count": 26,
+      "path": "qa/qa_092.json",
+      "scenario": "qa",
+      "sha256": "728482c5a9fa435d99bcbb356c919f82957a4320da32e8035febfad6680fd480",
+      "template_id": "qa_092"
+    },
+    {
+      "node_count": 20,
+      "path": "qa/qa_093.json",
+      "scenario": "qa",
+      "sha256": "5428b5988f4289d45eb87708318941e9527722989112dbda1ec0b9da7d07302e",
+      "template_id": "qa_093"
+    },
+    {
+      "node_count": 26,
+      "path": "qa/qa_094.json",
+      "scenario": "qa",
+      "sha256": "d41147a72b91a5030ea7a3a54620487ca542a145ae01467ec663a97bce8e5f39",
+      "template_id": "qa_094"
+    },
+    {
+      "node_count": 28,
+      "path": "qa/qa_095.json",
+      "scenario": "qa",
+      "sha256": "e534a385eda1d32efd5859f7fe4f6b6eb34bf27b43bc1c1424afac3896f24cc8",
+      "template_id": "qa_095"
+    },
+    {
+      "node_count": 24,
+      "path": "qa/qa_096.json",
+      "scenario": "qa",
+      "sha256": "1ff8f0329ff7b512ac5aab73bfe709e43d9e4d5a54ff8a276c849d7115e9bbd2",
+      "template_id": "qa_096"
+    },
+    {
+      "node_count": 24,
+      "path": "qa/qa_097.json",
+      "scenario": "qa",
+      "sha256": "39bf3f0350fcc1749ded5a48bd07941983d86dbf5e9be39f67fe33674b2c44c5",
+      "template_id": "qa_097"
+    },
+    {
+      "node_count": 42,
+      "path": "qa/qa_098.json",
+      "scenario": "qa",
+      "sha256": "e1bee8a402153ce1f4a0363a52bbc06fa730302b79c16faa74a7b5358e902da3",
+      "template_id": "qa_098"
+    },
+    {
+      "node_count": 42,
+      "path": "qa/qa_099.json",
+      "scenario": "qa",
+      "sha256": "c866ffe370fbffe95d64037b5409121f4b38e86afb32168fe1fc211ec9edee63",
+      "template_id": "qa_099"
+    },
+    {
+      "node_count": 50,
+      "path": "qa/qa_100.json",
+      "scenario": "qa",
+      "sha256": "6236d962d003774cb16b80a8188e5ca99f78758be2bc621e12228583ae9edd77",
+      "template_id": "qa_100"
+    },
+    {
+      "node_count": 3,
+      "path": "sql/sql_001.json",
+      "scenario": "sql",
+      "sha256": "9ea0a24af0aafad6e69c4ad447a3a05b9622de03dfd95d6d2351db70dfc77aad",
+      "template_id": "sql_001"
+    },
+    {
+      "node_count": 4,
+      "path": "sql/sql_002.json",
+      "scenario": "sql",
+      "sha256": "d14ad1b1d32754bd17650d237d62196784f3d7728f1f35d7849dd70da0b91e23",
+      "template_id": "sql_002"
+    },
+    {
+      "node_count": 4,
+      "path": "sql/sql_003.json",
+      "scenario": "sql",
+      "sha256": "e3534e073d6e6a989941b59d4e2c9e19399965e0c88777653ca761916c3a4fd7",
+      "template_id": "sql_003"
+    },
+    {
+      "node_count": 5,
+      "path": "sql/sql_004.json",
+      "scenario": "sql",
+      "sha256": "42d0409dcafa3e2c2bdf8e6ae20bbbf74d9aeb38c4920e11ad86d45d0ef0536d",
+      "template_id": "sql_004"
+    },
+    {
+      "node_count": 5,
+      "path": "sql/sql_005.json",
+      "scenario": "sql",
+      "sha256": "588e950bab8ee2c1acf41feabfbc46ddfaa593c13813db4777df1300950e9b05",
+      "template_id": "sql_005"
+    },
+    {
+      "node_count": 5,
+      "path": "sql/sql_006.json",
+      "scenario": "sql",
+      "sha256": "e97a63b41084dce60a484a847fafc05e83892f717aa2c92c87fc017cf8cf13c2",
+      "template_id": "sql_006"
+    },
+    {
+      "node_count": 5,
+      "path": "sql/sql_007.json",
+      "scenario": "sql",
+      "sha256": "015a884f63420582b722f82103e79860f38751e4fe18319903b402db718cb0ea",
+      "template_id": "sql_007"
+    },
+    {
+      "node_count": 6,
+      "path": "sql/sql_008.json",
+      "scenario": "sql",
+      "sha256": "4d80a8450250fc67963a2e67abfd447623d2ef80b2a8c88cd396d4027cd69857",
+      "template_id": "sql_008"
+    },
+    {
+      "node_count": 6,
+      "path": "sql/sql_009.json",
+      "scenario": "sql",
+      "sha256": "9d4e9151aa1642d8036db41e2fe87eec6d5271c299863fe2403fe2da66ec4bee",
+      "template_id": "sql_009"
+    },
+    {
+      "node_count": 6,
+      "path": "sql/sql_010.json",
+      "scenario": "sql",
+      "sha256": "ee246416a093731566f823e0fce40c5ad979f5238c0f449303db6943c4dca464",
+      "template_id": "sql_010"
+    },
+    {
+      "node_count": 6,
+      "path": "sql/sql_011.json",
+      "scenario": "sql",
+      "sha256": "157357e3e7dee3b8c00d23a2a12899abfc8e32061593c962c27f54f3210f1ccf",
+      "template_id": "sql_011"
+    },
+    {
+      "node_count": 6,
+      "path": "sql/sql_012.json",
+      "scenario": "sql",
+      "sha256": "8432e176992bc4c974797d088ce2bb27eae7e351fbebc71ea48f1ed83045e4e3",
+      "template_id": "sql_012"
+    },
+    {
+      "node_count": 6,
+      "path": "sql/sql_013.json",
+      "scenario": "sql",
+      "sha256": "c700f8447ae7bfffefb6f5b048ad10535bb1cb27dfd70c8238ccbd259adba5d0",
+      "template_id": "sql_013"
+    },
+    {
+      "node_count": 6,
+      "path": "sql/sql_014.json",
+      "scenario": "sql",
+      "sha256": "9314b5a107d4a20ae3cd8aa21b24c46df5995bfd67a6e802c130eb668d41679d",
+      "template_id": "sql_014"
+    },
+    {
+      "node_count": 7,
+      "path": "sql/sql_015.json",
+      "scenario": "sql",
+      "sha256": "1ed326a0fc99247375f19e14637c3b7f453ecda8f0840d4cd37c559b40906978",
+      "template_id": "sql_015"
+    },
+    {
+      "node_count": 7,
+      "path": "sql/sql_016.json",
+      "scenario": "sql",
+      "sha256": "90d4ed065e1691f8b32849bbc004e825107a38fbe39988ee0ae48b5cc0db364a",
+      "template_id": "sql_016"
+    },
+    {
+      "node_count": 7,
+      "path": "sql/sql_017.json",
+      "scenario": "sql",
+      "sha256": "a4c5351bf37488a1e73b569a158676a2d4461d3688aaaf4eed07dccb3a52d2f3",
+      "template_id": "sql_017"
+    },
+    {
+      "node_count": 7,
+      "path": "sql/sql_018.json",
+      "scenario": "sql",
+      "sha256": "34855ee5ac8e588df91d1f666067ec73f67cec35d6e948937118c60a89da60f0",
+      "template_id": "sql_018"
+    },
+    {
+      "node_count": 7,
+      "path": "sql/sql_019.json",
+      "scenario": "sql",
+      "sha256": "6c458800a915ce7267ba83ff51e2b6871778b50011587cb85212de2cf9fe82f1",
+      "template_id": "sql_019"
+    },
+    {
+      "node_count": 7,
+      "path": "sql/sql_020.json",
+      "scenario": "sql",
+      "sha256": "5414b7f0ed12b8154d25dec88c9f77bbbeb646017bc0597c29bce07a6a23949d",
+      "template_id": "sql_020"
+    },
+    {
+      "node_count": 7,
+      "path": "sql/sql_021.json",
+      "scenario": "sql",
+      "sha256": "bf2f6f8c001176365a4a42b11296a242a2f318ceefc244e94bf73522bba648e0",
+      "template_id": "sql_021"
+    },
+    {
+      "node_count": 7,
+      "path": "sql/sql_022.json",
+      "scenario": "sql",
+      "sha256": "a2f223c1be0841f71a302c5ba230f5d866c542da9199b142f5f90d8bf26b9444",
+      "template_id": "sql_022"
+    },
+    {
+      "node_count": 7,
+      "path": "sql/sql_023.json",
+      "scenario": "sql",
+      "sha256": "96b7ee6918caf0d36fc75418cfa3ca458a38ecba5c9369451cda3c210b23eb54",
+      "template_id": "sql_023"
+    },
+    {
+      "node_count": 7,
+      "path": "sql/sql_024.json",
+      "scenario": "sql",
+      "sha256": "e51a8760f8cd3f575fbdf44ef3b15657c24e553d87342e20d24e811182bc6af3",
+      "template_id": "sql_024"
+    },
+    {
+      "node_count": 8,
+      "path": "sql/sql_025.json",
+      "scenario": "sql",
+      "sha256": "d1fe97f1f8fb50d0723544b4351d89f6aa3c4cbd1787dcb1f1390e3cc5a7ffee",
+      "template_id": "sql_025"
+    },
+    {
+      "node_count": 8,
+      "path": "sql/sql_026.json",
+      "scenario": "sql",
+      "sha256": "c84062a54c13e67ee4061a720a866da5a526b419f5213dbefd7af514888fa187",
+      "template_id": "sql_026"
+    },
+    {
+      "node_count": 8,
+      "path": "sql/sql_027.json",
+      "scenario": "sql",
+      "sha256": "39a4a5f53036576c20ca0b129c61e3a69220ba67a4e15ff29a02160dfbeee70e",
+      "template_id": "sql_027"
+    },
+    {
+      "node_count": 8,
+      "path": "sql/sql_028.json",
+      "scenario": "sql",
+      "sha256": "f0f20d72ba2b5f76dc9dc0de8875ea49bb32e9379ae64f7832ad792ccb4a0cd8",
+      "template_id": "sql_028"
+    },
+    {
+      "node_count": 8,
+      "path": "sql/sql_029.json",
+      "scenario": "sql",
+      "sha256": "1e94ac7a197d7f2b1b124311ff3cf9ea0fd222fafaec877e37d0eb2110cfd12b",
+      "template_id": "sql_029"
+    },
+    {
+      "node_count": 8,
+      "path": "sql/sql_030.json",
+      "scenario": "sql",
+      "sha256": "4ba2b00c4c2c5d3f012fae3161522c95b7812bc880d8499082d5573c212c9dff",
+      "template_id": "sql_030"
+    },
+    {
+      "node_count": 8,
+      "path": "sql/sql_031.json",
+      "scenario": "sql",
+      "sha256": "a1dab7d95bb822f15b9c889f2bf5900405facc2d7f0aa91dd2979396324630b3",
+      "template_id": "sql_031"
+    },
+    {
+      "node_count": 8,
+      "path": "sql/sql_032.json",
+      "scenario": "sql",
+      "sha256": "49f9a8c18143c671e81e9774e3d3f953ae62bdc545a9ef120be7767addd2d105",
+      "template_id": "sql_032"
+    },
+    {
+      "node_count": 8,
+      "path": "sql/sql_033.json",
+      "scenario": "sql",
+      "sha256": "b12b2234e94927a4cd58c6f17e4683216bbd470c08d99d5d0650eecfe51c32b4",
+      "template_id": "sql_033"
+    },
+    {
+      "node_count": 8,
+      "path": "sql/sql_034.json",
+      "scenario": "sql",
+      "sha256": "ff6160161c537bcab7ccef2adbec16a9edc95f42dce54a321f618a7488dc5194",
+      "template_id": "sql_034"
+    },
+    {
+      "node_count": 8,
+      "path": "sql/sql_035.json",
+      "scenario": "sql",
+      "sha256": "6ccd2ebf6d2e5402c81c33f2bffde06162b7b70b82ac590b382b32c97d8d19dd",
+      "template_id": "sql_035"
+    },
+    {
+      "node_count": 8,
+      "path": "sql/sql_036.json",
+      "scenario": "sql",
+      "sha256": "e92f907494592af476de152a7c35aa18e06a245557d4d161d840359fa056f226",
+      "template_id": "sql_036"
+    },
+    {
+      "node_count": 8,
+      "path": "sql/sql_037.json",
+      "scenario": "sql",
+      "sha256": "72bc582140a3ad837dbcb7ba8eb6a5795d7536fef3a9e00a03c4715cbfe0073d",
+      "template_id": "sql_037"
+    },
+    {
+      "node_count": 8,
+      "path": "sql/sql_038.json",
+      "scenario": "sql",
+      "sha256": "b29fd4425510a901633716513c9b33f5f8ac20fbcd695a15ff2270809e8ebab8",
+      "template_id": "sql_038"
+    },
+    {
+      "node_count": 9,
+      "path": "sql/sql_039.json",
+      "scenario": "sql",
+      "sha256": "f6182c526e3cb54e92a7be47b6b791fed3a4df142e504c1ced893807edbfd8e7",
+      "template_id": "sql_039"
+    },
+    {
+      "node_count": 9,
+      "path": "sql/sql_040.json",
+      "scenario": "sql",
+      "sha256": "638e71054c0ff7ee9fb45228949c730f44769980e5006432775aaf634c5a6ba0",
+      "template_id": "sql_040"
+    },
+    {
+      "node_count": 9,
+      "path": "sql/sql_041.json",
+      "scenario": "sql",
+      "sha256": "d2c16f303af136564b70aab01eab92d08d2cfb96bcf0f582264b595791139168",
+      "template_id": "sql_041"
+    },
+    {
+      "node_count": 9,
+      "path": "sql/sql_042.json",
+      "scenario": "sql",
+      "sha256": "17512d3be0e86a82ace584c0378c7b510f730ecc4fc7a51a92a5abd2345a37f8",
+      "template_id": "sql_042"
+    },
+    {
+      "node_count": 9,
+      "path": "sql/sql_043.json",
+      "scenario": "sql",
+      "sha256": "85fab3e5fccae7b77971f9e1c0eb1271f6900b601f0d020777b466f13cabc0ce",
+      "template_id": "sql_043"
+    },
+    {
+      "node_count": 9,
+      "path": "sql/sql_044.json",
+      "scenario": "sql",
+      "sha256": "bc3908be88448903fa0b030e7f6a5ace9f94eba604e572b2f301e3b003755ef6",
+      "template_id": "sql_044"
+    },
+    {
+      "node_count": 9,
+      "path": "sql/sql_045.json",
+      "scenario": "sql",
+      "sha256": "628e63802f55d4f1ab42403e39fb88b32231ac89eb46d4ff2b13fd9ddfed312a",
+      "template_id": "sql_045"
+    },
+    {
+      "node_count": 9,
+      "path": "sql/sql_046.json",
+      "scenario": "sql",
+      "sha256": "03265569e28b46a96cfe109ff59bdaa9c8b5c8ac9cd2e4a8e7e853e61e4479eb",
+      "template_id": "sql_046"
+    },
+    {
+      "node_count": 9,
+      "path": "sql/sql_047.json",
+      "scenario": "sql",
+      "sha256": "a66feedf164463dba6da1a9199f6c6a661baa2d5b7ccebff3ae86f6bd22a6490",
+      "template_id": "sql_047"
+    },
+    {
+      "node_count": 9,
+      "path": "sql/sql_048.json",
+      "scenario": "sql",
+      "sha256": "94938771ac6fe1599000cf5e49865aeaaafe2f808c1544c97325d25670986b0c",
+      "template_id": "sql_048"
+    },
+    {
+      "node_count": 9,
+      "path": "sql/sql_049.json",
+      "scenario": "sql",
+      "sha256": "de80d1ee17fcfc1028c4492264520defaa1b7e8beeae52747cf72511ec3c70ea",
+      "template_id": "sql_049"
+    },
+    {
+      "node_count": 9,
+      "path": "sql/sql_050.json",
+      "scenario": "sql",
+      "sha256": "393240618b2685b5d49102cd7f3c2e112f933eedefbd5fe85fbb178e9e4609ad",
+      "template_id": "sql_050"
+    },
+    {
+      "node_count": 9,
+      "path": "sql/sql_051.json",
+      "scenario": "sql",
+      "sha256": "cfaa027076cc1f951b755de3f0f6a4f5acef69023bf59514e89759cac72f7a60",
+      "template_id": "sql_051"
+    },
+    {
+      "node_count": 9,
+      "path": "sql/sql_052.json",
+      "scenario": "sql",
+      "sha256": "ff7e3b0648e8263c94304c043097ab5147d851e64ca5660e18093f42a2bcd7a9",
+      "template_id": "sql_052"
+    },
+    {
+      "node_count": 9,
+      "path": "sql/sql_053.json",
+      "scenario": "sql",
+      "sha256": "b115343bdea5cbbccb4f98f5ccfcfc7e338afdda2022d3992a9f6fe9956175b0",
+      "template_id": "sql_053"
+    },
+    {
+      "node_count": 9,
+      "path": "sql/sql_054.json",
+      "scenario": "sql",
+      "sha256": "f554554e7f703195eccc1d171eab8a781a1de919ea209451a40c885ef5d3ca82",
+      "template_id": "sql_054"
+    },
+    {
+      "node_count": 10,
+      "path": "sql/sql_055.json",
+      "scenario": "sql",
+      "sha256": "d48a9b9c03595a15e7c552c7193c0a6035e543926da8e108e74c0aad4b5d30c0",
+      "template_id": "sql_055"
+    },
+    {
+      "node_count": 10,
+      "path": "sql/sql_056.json",
+      "scenario": "sql",
+      "sha256": "5335641413e5030e1c084f7c5737fff3d718898a8e09e91cbc13598c04e0ac69",
+      "template_id": "sql_056"
+    },
+    {
+      "node_count": 10,
+      "path": "sql/sql_057.json",
+      "scenario": "sql",
+      "sha256": "3a4debbc363bcdebb5588f5f674a522fed268cb03c13ffafc8071b9d29a56b45",
+      "template_id": "sql_057"
+    },
+    {
+      "node_count": 10,
+      "path": "sql/sql_058.json",
+      "scenario": "sql",
+      "sha256": "c34467b6df8ddfd84c0aa9ca23185a31847779fffda00f389d557ebb899cacbd",
+      "template_id": "sql_058"
+    },
+    {
+      "node_count": 10,
+      "path": "sql/sql_059.json",
+      "scenario": "sql",
+      "sha256": "0204e282c7279c1f6962e37c15f90c069aac70d8fabf967330cbe1dd7bfa7f76",
+      "template_id": "sql_059"
+    },
+    {
+      "node_count": 10,
+      "path": "sql/sql_060.json",
+      "scenario": "sql",
+      "sha256": "472fd42e6413dd5c76e969e17c004310f519d57922b67e225b66603d8ab77b58",
+      "template_id": "sql_060"
+    },
+    {
+      "node_count": 10,
+      "path": "sql/sql_061.json",
+      "scenario": "sql",
+      "sha256": "aa5e0234d77b34cee93acddc3a57c8c09a494a3bc80e280d476b0b4f5f76cfa7",
+      "template_id": "sql_061"
+    },
+    {
+      "node_count": 10,
+      "path": "sql/sql_062.json",
+      "scenario": "sql",
+      "sha256": "6019cadedc6eb7d61032d0c8b2546f4babc1784624785a09dc1ac2347853e65f",
+      "template_id": "sql_062"
+    },
+    {
+      "node_count": 10,
+      "path": "sql/sql_063.json",
+      "scenario": "sql",
+      "sha256": "4c68d6f2704219cddb65f92bc947e30d1ec0ca111aed50387bc81e853b0109cc",
+      "template_id": "sql_063"
+    },
+    {
+      "node_count": 10,
+      "path": "sql/sql_064.json",
+      "scenario": "sql",
+      "sha256": "21a6b0fd164098c7fa533b3aa7050c12347a1d6a94c1005dafebbaced4571761",
+      "template_id": "sql_064"
+    },
+    {
+      "node_count": 10,
+      "path": "sql/sql_065.json",
+      "scenario": "sql",
+      "sha256": "2be983c175a26950938d618b3a75687971c5e939d23999e9215ee55d4e7a1257",
+      "template_id": "sql_065"
+    },
+    {
+      "node_count": 10,
+      "path": "sql/sql_066.json",
+      "scenario": "sql",
+      "sha256": "5bd5fdf9eb86cce2a2601d0b37cac8a712b6acea35d22cee87478cf58f1f795c",
+      "template_id": "sql_066"
+    },
+    {
+      "node_count": 10,
+      "path": "sql/sql_067.json",
+      "scenario": "sql",
+      "sha256": "79092472d274f3671f2e26275430ec9730ed4839ad7deb4d7d53a31c29e21f8e",
+      "template_id": "sql_067"
+    },
+    {
+      "node_count": 10,
+      "path": "sql/sql_068.json",
+      "scenario": "sql",
+      "sha256": "afae169a36066a4deb99537eb5a756f2038e328741443daca09331e00ad7f703",
+      "template_id": "sql_068"
+    },
+    {
+      "node_count": 10,
+      "path": "sql/sql_069.json",
+      "scenario": "sql",
+      "sha256": "72a23cbd9532480a9fd4c76d999e8566eb4eace3b6bf98a3db0eeaf60865e00c",
+      "template_id": "sql_069"
+    },
+    {
+      "node_count": 10,
+      "path": "sql/sql_070.json",
+      "scenario": "sql",
+      "sha256": "452352f6267e7f36ae4fa78e34c4b6f5f859dc23291c90c2af75fcb724c6f888",
+      "template_id": "sql_070"
+    },
+    {
+      "node_count": 15,
+      "path": "sql/sql_071.json",
+      "scenario": "sql",
+      "sha256": "cc3556794c450c55cbf23d6251c58a67f6bfb58355a400770254596a11d9fae4",
+      "template_id": "sql_071"
+    },
+    {
+      "node_count": 19,
+      "path": "sql/sql_072.json",
+      "scenario": "sql",
+      "sha256": "1165333ae9421c4241e605daf06a870adc2f6604934fe1f9fcb70696e7533bca",
+      "template_id": "sql_072"
+    },
+    {
+      "node_count": 18,
+      "path": "sql/sql_073.json",
+      "scenario": "sql",
+      "sha256": "4349a93db3a310b5224b10f35bd93d600c854821335e4c88ff4d2cca06858562",
+      "template_id": "sql_073"
+    },
+    {
+      "node_count": 19,
+      "path": "sql/sql_074.json",
+      "scenario": "sql",
+      "sha256": "2029e2f7d81bbfe4678ac34407b2c22412f4ec3cb712c224bf29c9b90317af14",
+      "template_id": "sql_074"
+    },
+    {
+      "node_count": 16,
+      "path": "sql/sql_075.json",
+      "scenario": "sql",
+      "sha256": "14b1800584a101934bab509d20729f0bf1cc4dcca5bb6a83387afcf701ec10c7",
+      "template_id": "sql_075"
+    },
+    {
+      "node_count": 11,
+      "path": "sql/sql_076.json",
+      "scenario": "sql",
+      "sha256": "1485dbdab7944772a10bc3c51e138e668cd59b0742cc1e835188e99e22d5c993",
+      "template_id": "sql_076"
+    },
+    {
+      "node_count": 15,
+      "path": "sql/sql_077.json",
+      "scenario": "sql",
+      "sha256": "45f0ed7a1e6e2c836a099a5ddf6ee355ac152a3e2222fb16aa1eee48943f77b6",
+      "template_id": "sql_077"
+    },
+    {
+      "node_count": 14,
+      "path": "sql/sql_078.json",
+      "scenario": "sql",
+      "sha256": "480549cb9c71e90fbc90776fffa92631f781cc09744d11993921e35935b06d12",
+      "template_id": "sql_078"
+    },
+    {
+      "node_count": 15,
+      "path": "sql/sql_079.json",
+      "scenario": "sql",
+      "sha256": "25b1861485ecf37a0a81832fe9198be5262adfedef8eea79628440db968edbed",
+      "template_id": "sql_079"
+    },
+    {
+      "node_count": 17,
+      "path": "sql/sql_080.json",
+      "scenario": "sql",
+      "sha256": "de05df85b794b07cb08a023c039f2dbf1dc00c040b37ff7a9eac0fbbc7b8f68d",
+      "template_id": "sql_080"
+    },
+    {
+      "node_count": 13,
+      "path": "sql/sql_081.json",
+      "scenario": "sql",
+      "sha256": "7410f67e334768dd9f9a144b0a1520a8cf4907624d19ec1ca4997deb85d0ddcf",
+      "template_id": "sql_081"
+    },
+    {
+      "node_count": 11,
+      "path": "sql/sql_082.json",
+      "scenario": "sql",
+      "sha256": "fae53abf711cb2558fbe7c77f9a531c37054b5351d54b1041f726c73e0d3d29e",
+      "template_id": "sql_082"
+    },
+    {
+      "node_count": 13,
+      "path": "sql/sql_083.json",
+      "scenario": "sql",
+      "sha256": "12ad682b3e072c21c1a3b446111f0284a98b435f1b00ae4a5053dbef3c1afd92",
+      "template_id": "sql_083"
+    },
+    {
+      "node_count": 18,
+      "path": "sql/sql_084.json",
+      "scenario": "sql",
+      "sha256": "83ee2ab3f612d7fe0732bc037445b5e4aaaa7bdd6c416b41eea5eabb15caef7a",
+      "template_id": "sql_084"
+    },
+    {
+      "node_count": 13,
+      "path": "sql/sql_085.json",
+      "scenario": "sql",
+      "sha256": "16de9ece5f85da638120fb8f03b4e30890db458b19e710453f57fbd73eae4632",
+      "template_id": "sql_085"
+    },
+    {
+      "node_count": 19,
+      "path": "sql/sql_086.json",
+      "scenario": "sql",
+      "sha256": "6a3c6bdbc60e6925d94f14d1c8d86c086d84a3ccabe6ebb0ef2b62a442b893b2",
+      "template_id": "sql_086"
+    },
+    {
+      "node_count": 15,
+      "path": "sql/sql_087.json",
+      "scenario": "sql",
+      "sha256": "cf404b107ac44161fa7089ed948ed1cb5a1aeca170f9b2ae6cf7737d7e05f446",
+      "template_id": "sql_087"
+    },
+    {
+      "node_count": 18,
+      "path": "sql/sql_088.json",
+      "scenario": "sql",
+      "sha256": "982eb6478f0e1b4377428fe089ccd68501f014d0e110ecfddc715c4159f82f64",
+      "template_id": "sql_088"
+    },
+    {
+      "node_count": 15,
+      "path": "sql/sql_089.json",
+      "scenario": "sql",
+      "sha256": "b4817d398b4dae83865024a0b3492d79c6b28710645b83de3f20ce8bb30ba86c",
+      "template_id": "sql_089"
+    },
+    {
+      "node_count": 14,
+      "path": "sql/sql_090.json",
+      "scenario": "sql",
+      "sha256": "3ff415e5517bc39d9dfc3f03fd311db3d1ee7e1e29de4e390375e1462b98c610",
+      "template_id": "sql_090"
+    },
+    {
+      "node_count": 24,
+      "path": "sql/sql_091.json",
+      "scenario": "sql",
+      "sha256": "9a76e78c126538705789985d9414742ce6e41a3c0de38163885b96ddbce204d6",
+      "template_id": "sql_091"
+    },
+    {
+      "node_count": 20,
+      "path": "sql/sql_092.json",
+      "scenario": "sql",
+      "sha256": "02d6d5ffcd2462bd5ff06a2466472613f1d6ff804f5cff4eb785653ff641505d",
+      "template_id": "sql_092"
+    },
+    {
+      "node_count": 22,
+      "path": "sql/sql_093.json",
+      "scenario": "sql",
+      "sha256": "d2966a7daff5f77703df274b863b1508f2300bd272332ffbc046c31b880b1729",
+      "template_id": "sql_093"
+    },
+    {
+      "node_count": 29,
+      "path": "sql/sql_094.json",
+      "scenario": "sql",
+      "sha256": "53ee1ec51664cdddc3ad9ad9cbe4c5d49505f8e4657615c335b24ccf9588527f",
+      "template_id": "sql_094"
+    },
+    {
+      "node_count": 28,
+      "path": "sql/sql_095.json",
+      "scenario": "sql",
+      "sha256": "b6373169ad58a874a7094fa5b145cb85dd7af92e82d7e22f8aeb07cff0f06ca8",
+      "template_id": "sql_095"
+    },
+    {
+      "node_count": 28,
+      "path": "sql/sql_096.json",
+      "scenario": "sql",
+      "sha256": "114186ffc3615e1bd78b17677eec8ae888230b8e90369a8e7aa363045d456b0b",
+      "template_id": "sql_096"
+    },
+    {
+      "node_count": 22,
+      "path": "sql/sql_097.json",
+      "scenario": "sql",
+      "sha256": "a35651437c412ef58e79e78a417bcb3987ad09581773474a0f6edd2fae3cc7bb",
+      "template_id": "sql_097"
+    },
+    {
+      "node_count": 33,
+      "path": "sql/sql_098.json",
+      "scenario": "sql",
+      "sha256": "e7f5da430f712e3fa88a87279041c85b8674504db38002e056f41bfb10a68c25",
+      "template_id": "sql_098"
+    },
+    {
+      "node_count": 31,
+      "path": "sql/sql_099.json",
+      "scenario": "sql",
+      "sha256": "8cfdb3f35129b624abe3036f072992fdb1a67b840249392a5177c2bd5aa7308d",
+      "template_id": "sql_099"
+    },
+    {
+      "node_count": 50,
+      "path": "sql/sql_100.json",
+      "scenario": "sql",
+      "sha256": "81f941b00c7e687d343d4be1f88cfe8149545fb4ad9eae8e4c89b9308d0404d0",
+      "template_id": "sql_100"
+    }
+  ],
+  "validation_command": "python3 checks/check_workflow_catalog.py --catalog datasets/workflow_catalog_v1 --output datasets/workflow_catalog_v1/validation.json",
+  "version": "geoleap-typed-dag-v1"
+}

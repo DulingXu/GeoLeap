@@ -1,0 +1,1498 @@
+{
+  "cache_regions": [
+    {
+      "name": "region_001",
+      "nodes": [
+        "n001"
+      ]
+    },
+    {
+      "name": "region_002",
+      "nodes": [
+        "n002"
+      ]
+    },
+    {
+      "name": "region_003",
+      "nodes": [
+        "n003"
+      ]
+    },
+    {
+      "name": "region_004",
+      "nodes": [
+        "n004"
+      ]
+    },
+    {
+      "name": "region_005",
+      "nodes": [
+        "n005"
+      ]
+    },
+    {
+      "name": "region_006",
+      "nodes": [
+        "n006"
+      ]
+    },
+    {
+      "name": "region_007",
+      "nodes": [
+        "n007"
+      ]
+    },
+    {
+      "name": "region_008",
+      "nodes": [
+        "n008"
+      ]
+    },
+    {
+      "name": "region_009",
+      "nodes": [
+        "n009"
+      ]
+    },
+    {
+      "name": "region_010",
+      "nodes": [
+        "n010"
+      ]
+    },
+    {
+      "name": "region_011",
+      "nodes": [
+        "n011"
+      ]
+    },
+    {
+      "name": "region_012",
+      "nodes": [
+        "n012"
+      ]
+    },
+    {
+      "name": "region_013",
+      "nodes": [
+        "n013"
+      ]
+    },
+    {
+      "name": "region_014",
+      "nodes": [
+        "n014"
+      ]
+    },
+    {
+      "name": "region_015",
+      "nodes": [
+        "n015"
+      ]
+    },
+    {
+      "name": "region_016",
+      "nodes": [
+        "n016"
+      ]
+    },
+    {
+      "name": "region_017",
+      "nodes": [
+        "n017"
+      ]
+    },
+    {
+      "name": "region_018",
+      "nodes": [
+        "n018"
+      ]
+    },
+    {
+      "name": "region_019",
+      "nodes": [
+        "n019"
+      ]
+    },
+    {
+      "name": "region_020",
+      "nodes": [
+        "n020"
+      ]
+    },
+    {
+      "name": "region_021",
+      "nodes": [
+        "n021"
+      ]
+    },
+    {
+      "name": "region_022",
+      "nodes": [
+        "n022"
+      ]
+    },
+    {
+      "name": "region_023",
+      "nodes": [
+        "n023"
+      ]
+    },
+    {
+      "name": "region_024",
+      "nodes": [
+        "n024"
+      ]
+    },
+    {
+      "name": "region_025",
+      "nodes": [
+        "n025"
+      ]
+    },
+    {
+      "name": "region_026",
+      "nodes": [
+        "n026"
+      ]
+    },
+    {
+      "name": "region_027",
+      "nodes": [
+        "n027"
+      ]
+    },
+    {
+      "name": "region_028",
+      "nodes": [
+        "n002",
+        "n005"
+      ]
+    },
+    {
+      "name": "region_029",
+      "nodes": [
+        "n003",
+        "n006"
+      ]
+    },
+    {
+      "name": "region_030",
+      "nodes": [
+        "n004",
+        "n007"
+      ]
+    },
+    {
+      "name": "region_031",
+      "nodes": [
+        "n006",
+        "n008"
+      ]
+    },
+    {
+      "name": "region_032",
+      "nodes": [
+        "n007",
+        "n009"
+      ]
+    },
+    {
+      "name": "region_033",
+      "nodes": [
+        "n008",
+        "n010"
+      ]
+    },
+    {
+      "name": "region_034",
+      "nodes": [
+        "n009",
+        "n011"
+      ]
+    },
+    {
+      "name": "region_035",
+      "nodes": [
+        "n010",
+        "n012"
+      ]
+    },
+    {
+      "name": "region_036",
+      "nodes": [
+        "n014",
+        "n018"
+      ]
+    },
+    {
+      "name": "region_037",
+      "nodes": [
+        "n018",
+        "n021"
+      ]
+    },
+    {
+      "name": "region_038",
+      "nodes": [
+        "n020",
+        "n022"
+      ]
+    },
+    {
+      "name": "region_039",
+      "nodes": [
+        "n021",
+        "n023"
+      ]
+    },
+    {
+      "name": "region_040",
+      "nodes": [
+        "n022",
+        "n024"
+      ]
+    },
+    {
+      "name": "region_041",
+      "nodes": [
+        "n003",
+        "n006",
+        "n008"
+      ]
+    },
+    {
+      "name": "region_042",
+      "nodes": [
+        "n004",
+        "n007",
+        "n009"
+      ]
+    },
+    {
+      "name": "region_043",
+      "nodes": [
+        "n006",
+        "n008",
+        "n010"
+      ]
+    },
+    {
+      "name": "region_044",
+      "nodes": [
+        "n007",
+        "n009",
+        "n011"
+      ]
+    },
+    {
+      "name": "region_045",
+      "nodes": [
+        "n008",
+        "n010",
+        "n012"
+      ]
+    },
+    {
+      "name": "region_046",
+      "nodes": [
+        "n014",
+        "n018",
+        "n021"
+      ]
+    },
+    {
+      "name": "region_047",
+      "nodes": [
+        "n018",
+        "n021",
+        "n023"
+      ]
+    },
+    {
+      "name": "region_048",
+      "nodes": [
+        "n020",
+        "n022",
+        "n024"
+      ]
+    },
+    {
+      "name": "region_049",
+      "nodes": [
+        "n003",
+        "n006",
+        "n008",
+        "n010"
+      ]
+    },
+    {
+      "name": "region_050",
+      "nodes": [
+        "n004",
+        "n007",
+        "n009",
+        "n011"
+      ]
+    },
+    {
+      "name": "region_051",
+      "nodes": [
+        "n006",
+        "n008",
+        "n010",
+        "n012"
+      ]
+    },
+    {
+      "name": "region_052",
+      "nodes": [
+        "n014",
+        "n018",
+        "n021",
+        "n023"
+      ]
+    },
+    {
+      "name": "region_053",
+      "nodes": [
+        "n003",
+        "n006",
+        "n008",
+        "n010",
+        "n012"
+      ]
+    }
+  ],
+  "edges": [
+    [
+      "n001",
+      "n002"
+    ],
+    [
+      "n001",
+      "n003"
+    ],
+    [
+      "n001",
+      "n004"
+    ],
+    [
+      "n002",
+      "n005"
+    ],
+    [
+      "n003",
+      "n006"
+    ],
+    [
+      "n004",
+      "n007"
+    ],
+    [
+      "n006",
+      "n008"
+    ],
+    [
+      "n007",
+      "n009"
+    ],
+    [
+      "n008",
+      "n010"
+    ],
+    [
+      "n009",
+      "n011"
+    ],
+    [
+      "n010",
+      "n012"
+    ],
+    [
+      "n011",
+      "n013"
+    ],
+    [
+      "n011",
+      "n014"
+    ],
+    [
+      "n012",
+      "n015"
+    ],
+    [
+      "n012",
+      "n016"
+    ],
+    [
+      "n012",
+      "n017"
+    ],
+    [
+      "n014",
+      "n018"
+    ],
+    [
+      "n017",
+      "n019"
+    ],
+    [
+      "n017",
+      "n020"
+    ],
+    [
+      "n018",
+      "n021"
+    ],
+    [
+      "n020",
+      "n022"
+    ],
+    [
+      "n021",
+      "n023"
+    ],
+    [
+      "n022",
+      "n024"
+    ],
+    [
+      "n013",
+      "n025"
+    ],
+    [
+      "n023",
+      "n025"
+    ],
+    [
+      "n019",
+      "n026"
+    ],
+    [
+      "n024",
+      "n026"
+    ],
+    [
+      "n015",
+      "n027"
+    ],
+    [
+      "n016",
+      "n027"
+    ],
+    [
+      "n026",
+      "n027"
+    ],
+    [
+      "n005",
+      "n028"
+    ],
+    [
+      "n025",
+      "n028"
+    ],
+    [
+      "n027",
+      "n028"
+    ]
+  ],
+  "execution_contract": {
+    "guards": [
+      "resource_version",
+      "model_version"
+    ],
+    "initial_fields": {
+      "model_version": "string",
+      "question": "string",
+      "resource_version": "string"
+    },
+    "profile_cost_and_latency": "unspecified; compiler defaults zero, never measured costs",
+    "real_operator_bindings": "explicit injection required; not provided by this generator",
+    "reference_answers_available_to_service_nodes": false,
+    "resource_resolution": "Bindings resolve immutable corpus/schema/database snapshots from resource_version.",
+    "scheduler": "current GeoLeapRuntime is serial"
+  },
+  "generation": {
+    "candidate_number": 123,
+    "deduplication": "Exact directed isomorphism ignoring IDs, operator names and parameters; signature is only a bucket key.",
+    "history_node_ids": "construction-time IDs; final IDs are renumbered",
+    "limits": {
+      "max_antichain_width": 8,
+      "max_branch_fanout": 4,
+      "max_nodes": 50,
+      "max_parent_count": 4,
+      "max_retrievals_per_path": 4,
+      "max_same_operator_per_path": 2,
+      "max_sql_repairs_per_path": 2
+    },
+    "node_budget": 28,
+    "rules": [
+      {
+        "rule": "seed",
+        "variant": "reduced_din_sql"
+      },
+      {
+        "branch_roles": [
+          "direct",
+          "decomposition_guided",
+          "join_first"
+        ],
+        "new_nodes": [
+          "n004",
+          "n005",
+          "n006"
+        ],
+        "operator": "sql.generate",
+        "replaced_node": "n002",
+        "rule": "strategy_fork_fused_join"
+      },
+      {
+        "new_nodes": [
+          "n007"
+        ],
+        "operators": [
+          "sql.classify"
+        ],
+        "replaced_edge": [
+          "n001",
+          "n006"
+        ],
+        "rule": "typed_stage_insertion"
+      },
+      {
+        "new_nodes": [
+          "n008"
+        ],
+        "operators": [
+          "sql.prune_schema"
+        ],
+        "replaced_edge": [
+          "n001",
+          "n004"
+        ],
+        "rule": "typed_stage_insertion"
+      },
+      {
+        "branch_roles": [
+          "direct",
+          "decomposition_guided"
+        ],
+        "new_nodes": [
+          "n009",
+          "n010",
+          "n011"
+        ],
+        "operator": "sql.generate",
+        "replaced_node": "n006",
+        "rule": "strategy_fork_explicit_join"
+      },
+      {
+        "new_nodes": [
+          "n012",
+          "n013"
+        ],
+        "operators": [
+          "sql.execute",
+          "sql.repair"
+        ],
+        "replaced_edge": [
+          "n009",
+          "n011"
+        ],
+        "rule": "bounded_execute_repair"
+      },
+      {
+        "new_nodes": [
+          "n014"
+        ],
+        "operators": [
+          "sql.decompose"
+        ],
+        "replaced_edge": [
+          "n007",
+          "n009"
+        ],
+        "rule": "typed_stage_insertion"
+      },
+      {
+        "branch_roles": [
+          "direct",
+          "decomposition_guided",
+          "join_first"
+        ],
+        "new_nodes": [
+          "n015",
+          "n016",
+          "n017",
+          "n018"
+        ],
+        "operator": "sql.generate",
+        "replaced_node": "n004",
+        "rule": "strategy_fork_explicit_join"
+      },
+      {
+        "new_nodes": [
+          "n019"
+        ],
+        "operators": [
+          "sql.join_analysis"
+        ],
+        "replaced_edge": [
+          "n008",
+          "n015"
+        ],
+        "rule": "typed_stage_insertion"
+      },
+      {
+        "new_nodes": [
+          "n020"
+        ],
+        "operators": [
+          "sql.decompose"
+        ],
+        "replaced_edge": [
+          "n001",
+          "n008"
+        ],
+        "rule": "typed_stage_insertion"
+      },
+      {
+        "new_nodes": [
+          "n021"
+        ],
+        "operators": [
+          "sql.classify"
+        ],
+        "replaced_edge": [
+          "n001",
+          "n020"
+        ],
+        "rule": "typed_stage_insertion"
+      },
+      {
+        "new_nodes": [
+          "n022"
+        ],
+        "operators": [
+          "sql.retrieve_values"
+        ],
+        "replaced_edge": [
+          "n001",
+          "n007"
+        ],
+        "rule": "typed_stage_insertion"
+      },
+      {
+        "new_nodes": [
+          "n023"
+        ],
+        "operators": [
+          "sql.classify"
+        ],
+        "replaced_edge": [
+          "n001",
+          "n022"
+        ],
+        "rule": "typed_stage_insertion"
+      },
+      {
+        "new_nodes": [
+          "n024"
+        ],
+        "operators": [
+          "sql.join_analysis"
+        ],
+        "replaced_edge": [
+          "n020",
+          "n008"
+        ],
+        "rule": "typed_stage_insertion"
+      },
+      {
+        "branch_roles": [
+          "direct",
+          "decomposition_guided"
+        ],
+        "new_nodes": [
+          "n025",
+          "n026",
+          "n027"
+        ],
+        "operator": "sql.generate",
+        "replaced_node": "n015",
+        "rule": "strategy_fork_explicit_join"
+      },
+      {
+        "new_nodes": [
+          "n028"
+        ],
+        "operators": [
+          "sql.decompose"
+        ],
+        "replaced_edge": [
+          "n019",
+          "n026"
+        ],
+        "rule": "typed_stage_insertion"
+      },
+      {
+        "new_nodes": [
+          "n029"
+        ],
+        "operators": [
+          "sql.prune_schema"
+        ],
+        "replaced_edge": [
+          "n001",
+          "n023"
+        ],
+        "rule": "typed_stage_insertion"
+      },
+      {
+        "new_nodes": [
+          "n030"
+        ],
+        "operators": [
+          "sql.classify"
+        ],
+        "replaced_edge": [
+          "n020",
+          "n024"
+        ],
+        "rule": "typed_stage_insertion"
+      },
+      {
+        "new_nodes": [
+          "n031"
+        ],
+        "operators": [
+          "sql.prune_schema"
+        ],
+        "replaced_edge": [
+          "n028",
+          "n026"
+        ],
+        "rule": "typed_stage_insertion"
+      },
+      {
+        "new_nodes": [
+          "n032"
+        ],
+        "operators": [
+          "sql.execute"
+        ],
+        "replaced_edge": [
+          "n005",
+          "n003"
+        ],
+        "rule": "typed_stage_insertion"
+      }
+    ],
+    "scenario_rng_seed": 21261114,
+    "seed": 20261111,
+    "size_stratum": "large",
+    "topology_bucket_key": "dag-wl-v1:145b4c370ab9cd355ab496764fd7eeeb7ab9a69c47b46b8c29f984d2e36091e8"
+  },
+  "metrics": {
+    "branched": true,
+    "cache_region_count": 53,
+    "edge_count": 33,
+    "generation_sizes": [
+      1,
+      3,
+      3,
+      2,
+      2,
+      3,
+      4,
+      3,
+      2,
+      2,
+      1,
+      1,
+      1
+    ],
+    "longest_path_edges": 12,
+    "longest_path_nodes": 13,
+    "max_generation_width": 4,
+    "max_in_degree": 3,
+    "max_out_degree": 3,
+    "maximum_antichain_width": 7,
+    "node_count": 28,
+    "operator_counts": {
+      "sql.classify": 4,
+      "sql.decompose": 3,
+      "sql.execute": 2,
+      "sql.generate": 7,
+      "sql.join_analysis": 2,
+      "sql.prune_schema": 3,
+      "sql.repair": 1,
+      "sql.retrieve_values": 1,
+      "sql.schema_linking": 1,
+      "sql.select_and_correct": 1,
+      "sql.select_candidate": 3
+    },
+    "operator_kind_counts": {
+      "LLM": 25,
+      "Tool": 3
+    },
+    "rejected_cache_region_candidates": 4,
+    "root_count": 1,
+    "roots": [
+      "n001"
+    ],
+    "sink_count": 1,
+    "sinks": [
+      "n028"
+    ],
+    "topological_order": [
+      "n001",
+      "n002",
+      "n003",
+      "n004",
+      "n005",
+      "n006",
+      "n007",
+      "n008",
+      "n009",
+      "n010",
+      "n011",
+      "n012",
+      "n013",
+      "n014",
+      "n015",
+      "n016",
+      "n017",
+      "n018",
+      "n019",
+      "n020",
+      "n021",
+      "n022",
+      "n023",
+      "n024",
+      "n025",
+      "n026",
+      "n027",
+      "n028"
+    ],
+    "weak_component_count": 1
+  },
+  "nodes": [
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [],
+      "id": "n001",
+      "kind": "LLM",
+      "operator": "sql.schema_linking",
+      "output_field": "n001__payload",
+      "output_type": "sql.context",
+      "parameters": {
+        "role": "default"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n001"
+      ],
+      "id": "n002",
+      "kind": "LLM",
+      "operator": "sql.generate",
+      "output_field": "n002__payload",
+      "output_type": "sql.candidate",
+      "parameters": {
+        "role": "decomposition_guided"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n001"
+      ],
+      "id": "n003",
+      "kind": "LLM",
+      "operator": "sql.classify",
+      "output_field": "n003__payload",
+      "output_type": "sql.context",
+      "parameters": {
+        "role": "aggregation_complexity"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n001"
+      ],
+      "id": "n004",
+      "kind": "LLM",
+      "operator": "sql.prune_schema",
+      "output_field": "n004__payload",
+      "output_type": "sql.context",
+      "parameters": {
+        "role": "projection_columns"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n002"
+      ],
+      "id": "n005",
+      "kind": "Tool",
+      "operator": "sql.execute",
+      "output_field": "n005__payload",
+      "output_type": "sql.checked",
+      "parameters": {
+        "role": "default"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n003"
+      ],
+      "id": "n006",
+      "kind": "LLM",
+      "operator": "sql.decompose",
+      "output_field": "n006__payload",
+      "output_type": "sql.context",
+      "parameters": {
+        "role": "projection"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n004"
+      ],
+      "id": "n007",
+      "kind": "LLM",
+      "operator": "sql.classify",
+      "output_field": "n007__payload",
+      "output_type": "sql.context",
+      "parameters": {
+        "role": "join_complexity"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n006"
+      ],
+      "id": "n008",
+      "kind": "LLM",
+      "operator": "sql.classify",
+      "output_field": "n008__payload",
+      "output_type": "sql.context",
+      "parameters": {
+        "role": "join_complexity"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n007"
+      ],
+      "id": "n009",
+      "kind": "Tool",
+      "operator": "sql.retrieve_values",
+      "output_field": "n009__payload",
+      "output_type": "sql.context",
+      "parameters": {
+        "role": "entity_values"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n008"
+      ],
+      "id": "n010",
+      "kind": "LLM",
+      "operator": "sql.join_analysis",
+      "output_field": "n010__payload",
+      "output_type": "sql.context",
+      "parameters": {
+        "role": "foreign_key_paths"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n009"
+      ],
+      "id": "n011",
+      "kind": "LLM",
+      "operator": "sql.classify",
+      "output_field": "n011__payload",
+      "output_type": "sql.context",
+      "parameters": {
+        "role": "join_complexity"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n010"
+      ],
+      "id": "n012",
+      "kind": "LLM",
+      "operator": "sql.prune_schema",
+      "output_field": "n012__payload",
+      "output_type": "sql.context",
+      "parameters": {
+        "role": "projection_columns"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n011"
+      ],
+      "id": "n013",
+      "kind": "LLM",
+      "operator": "sql.generate",
+      "output_field": "n013__payload",
+      "output_type": "sql.candidate",
+      "parameters": {
+        "role": "decomposition_guided"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n011"
+      ],
+      "id": "n014",
+      "kind": "LLM",
+      "operator": "sql.decompose",
+      "output_field": "n014__payload",
+      "output_type": "sql.context",
+      "parameters": {
+        "role": "projection"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n012"
+      ],
+      "id": "n015",
+      "kind": "LLM",
+      "operator": "sql.generate",
+      "output_field": "n015__payload",
+      "output_type": "sql.candidate",
+      "parameters": {
+        "role": "decomposition_guided"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n012"
+      ],
+      "id": "n016",
+      "kind": "LLM",
+      "operator": "sql.generate",
+      "output_field": "n016__payload",
+      "output_type": "sql.candidate",
+      "parameters": {
+        "role": "join_first"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n012"
+      ],
+      "id": "n017",
+      "kind": "LLM",
+      "operator": "sql.join_analysis",
+      "output_field": "n017__payload",
+      "output_type": "sql.context",
+      "parameters": {
+        "role": "foreign_key_paths"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n014"
+      ],
+      "id": "n018",
+      "kind": "LLM",
+      "operator": "sql.generate",
+      "output_field": "n018__payload",
+      "output_type": "sql.candidate",
+      "parameters": {
+        "role": "direct"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n017"
+      ],
+      "id": "n019",
+      "kind": "LLM",
+      "operator": "sql.generate",
+      "output_field": "n019__payload",
+      "output_type": "sql.candidate",
+      "parameters": {
+        "role": "direct"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n017"
+      ],
+      "id": "n020",
+      "kind": "LLM",
+      "operator": "sql.decompose",
+      "output_field": "n020__payload",
+      "output_type": "sql.context",
+      "parameters": {
+        "role": "projection"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n018"
+      ],
+      "id": "n021",
+      "kind": "Tool",
+      "operator": "sql.execute",
+      "output_field": "n021__payload",
+      "output_type": "sql.checked",
+      "parameters": {
+        "role": "default"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n020"
+      ],
+      "id": "n022",
+      "kind": "LLM",
+      "operator": "sql.prune_schema",
+      "output_field": "n022__payload",
+      "output_type": "sql.context",
+      "parameters": {
+        "role": "projection_columns"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n021"
+      ],
+      "id": "n023",
+      "kind": "LLM",
+      "operator": "sql.repair",
+      "output_field": "n023__payload",
+      "output_type": "sql.candidate",
+      "parameters": {
+        "role": "syntax_and_names"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n022"
+      ],
+      "id": "n024",
+      "kind": "LLM",
+      "operator": "sql.generate",
+      "output_field": "n024__payload",
+      "output_type": "sql.candidate",
+      "parameters": {
+        "role": "decomposition_guided"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n013",
+        "n023"
+      ],
+      "id": "n025",
+      "kind": "LLM",
+      "operator": "sql.select_candidate",
+      "output_field": "n025__payload",
+      "output_type": "sql.candidate",
+      "parameters": {
+        "role": "default"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n019",
+        "n024"
+      ],
+      "id": "n026",
+      "kind": "LLM",
+      "operator": "sql.select_candidate",
+      "output_field": "n026__payload",
+      "output_type": "sql.candidate",
+      "parameters": {
+        "role": "default"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n015",
+        "n016",
+        "n026"
+      ],
+      "id": "n027",
+      "kind": "LLM",
+      "operator": "sql.select_candidate",
+      "output_field": "n027__payload",
+      "output_type": "sql.candidate",
+      "parameters": {
+        "role": "default"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n005",
+        "n025",
+        "n027"
+      ],
+      "id": "n028",
+      "kind": "LLM",
+      "operator": "sql.select_and_correct",
+      "output_field": "n028__payload",
+      "output_type": "sql.answer",
+      "parameters": {
+        "role": "default"
+      },
+      "terminal": true
+    }
+  ],
+  "operator_contracts": {
+    "sql.classify": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Classify query complexity and annotate generation context.",
+      "input_types": [
+        "sql.context"
+      ],
+      "kind": "LLM",
+      "max_inputs": 1,
+      "min_inputs": 1,
+      "output_type": "sql.context",
+      "required_data": {
+        "schema_context": "object"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "sql.decompose": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Decompose the question into relational requirements.",
+      "input_types": [
+        "sql.context"
+      ],
+      "kind": "LLM",
+      "max_inputs": 1,
+      "min_inputs": 1,
+      "output_type": "sql.context",
+      "required_data": {
+        "schema_context": "object"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "sql.execute": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Execute candidate SQL read-only with timeout; return execution diagnostics, never gold comparisons.",
+      "input_types": [
+        "sql.candidate"
+      ],
+      "kind": "Tool",
+      "max_inputs": 1,
+      "min_inputs": 1,
+      "output_type": "sql.checked",
+      "required_data": {
+        "execution": "object",
+        "schema_context": "object",
+        "sql": "string"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "sql.generate": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Generate one candidate SQL using every parent context.",
+      "input_types": [
+        "sql.context"
+      ],
+      "kind": "LLM",
+      "max_inputs": 4,
+      "min_inputs": 1,
+      "output_type": "sql.candidate",
+      "required_data": {
+        "schema_context": "object",
+        "sql": "string"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "sql.join_analysis": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Resolve join paths, keys and cardinality constraints.",
+      "input_types": [
+        "sql.context"
+      ],
+      "kind": "LLM",
+      "max_inputs": 1,
+      "min_inputs": 1,
+      "output_type": "sql.context",
+      "required_data": {
+        "schema_context": "object"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "sql.prune_schema": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Annotate selected schema elements for a relational concern; retain immutable base schema and join keys rather than destructively removing them.",
+      "input_types": [
+        "sql.context"
+      ],
+      "kind": "LLM",
+      "max_inputs": 1,
+      "min_inputs": 1,
+      "output_type": "sql.context",
+      "required_data": {
+        "schema_context": "object"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "sql.repair": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Revise SQL from current question, schema and observed execution diagnostics.",
+      "input_types": [
+        "sql.checked"
+      ],
+      "kind": "LLM",
+      "max_inputs": 1,
+      "min_inputs": 1,
+      "output_type": "sql.candidate",
+      "required_data": {
+        "schema_context": "object",
+        "sql": "string"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "sql.retrieve_values": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Read database values for grounding without modifying the database.",
+      "input_types": [
+        "sql.context"
+      ],
+      "kind": "Tool",
+      "max_inputs": 1,
+      "min_inputs": 1,
+      "output_type": "sql.context",
+      "required_data": {
+        "schema_context": "object"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "sql.schema_linking": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Link the current question to a fixed database schema and evidence.",
+      "input_types": [],
+      "kind": "LLM",
+      "max_inputs": 0,
+      "min_inputs": 0,
+      "output_type": "sql.context",
+      "required_data": {
+        "schema_context": "object"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "sql.select_and_correct": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Compare all candidates, then review the selected SQL; fused terminal selection.",
+      "input_types": [
+        "sql.candidate",
+        "sql.checked"
+      ],
+      "kind": "LLM",
+      "max_inputs": 4,
+      "min_inputs": 2,
+      "output_type": "sql.answer",
+      "required_data": {
+        "sql": "string"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "sql.select_candidate": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Compare candidate SQL and available diagnostics without reference SQL.",
+      "input_types": [
+        "sql.candidate",
+        "sql.checked"
+      ],
+      "kind": "LLM",
+      "max_inputs": 4,
+      "min_inputs": 2,
+      "output_type": "sql.candidate",
+      "required_data": {
+        "schema_context": "object",
+        "sql": "string"
+      },
+      "side_effects": "none; resource access must be read-only"
+    }
+  },
+  "provenance": {
+    "base_method": "din_sql",
+    "benchmark_tasks_used_during_generation": false,
+    "category": "constrained_generated_derivative",
+    "note": "Shorter variants omit stages; fork/join and bounded refinements extend the cited stage organization.",
+    "original_method_reproduction": false,
+    "stage_aligned_reference": false
+  },
+  "scenario": "sql",
+  "template_id": "sql_095",
+  "validation": {
+    "fixture_execution": "pending_independent_validation",
+    "performance_evaluation": "not_run",
+    "real_service_execution": "not_run",
+    "structure_validated": true,
+    "task_quality_evaluation": "not_run"
+  },
+  "version": "geoleap-typed-dag-v1"
+}

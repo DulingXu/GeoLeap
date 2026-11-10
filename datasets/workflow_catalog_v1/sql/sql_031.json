@@ -1,0 +1,524 @@
+{
+  "cache_regions": [
+    {
+      "name": "region_001",
+      "nodes": [
+        "n001"
+      ]
+    },
+    {
+      "name": "region_002",
+      "nodes": [
+        "n002"
+      ]
+    },
+    {
+      "name": "region_003",
+      "nodes": [
+        "n003"
+      ]
+    },
+    {
+      "name": "region_004",
+      "nodes": [
+        "n004"
+      ]
+    },
+    {
+      "name": "region_005",
+      "nodes": [
+        "n005"
+      ]
+    },
+    {
+      "name": "region_006",
+      "nodes": [
+        "n006"
+      ]
+    },
+    {
+      "name": "region_007",
+      "nodes": [
+        "n007"
+      ]
+    },
+    {
+      "name": "region_008",
+      "nodes": [
+        "n003",
+        "n004"
+      ]
+    },
+    {
+      "name": "region_009",
+      "nodes": [
+        "n004",
+        "n005"
+      ]
+    },
+    {
+      "name": "region_010",
+      "nodes": [
+        "n005",
+        "n006"
+      ]
+    },
+    {
+      "name": "region_011",
+      "nodes": [
+        "n003",
+        "n004",
+        "n005"
+      ]
+    },
+    {
+      "name": "region_012",
+      "nodes": [
+        "n004",
+        "n005",
+        "n006"
+      ]
+    },
+    {
+      "name": "region_013",
+      "nodes": [
+        "n003",
+        "n004",
+        "n005",
+        "n006"
+      ]
+    }
+  ],
+  "edges": [
+    [
+      "n001",
+      "n002"
+    ],
+    [
+      "n001",
+      "n003"
+    ],
+    [
+      "n003",
+      "n004"
+    ],
+    [
+      "n004",
+      "n005"
+    ],
+    [
+      "n005",
+      "n006"
+    ],
+    [
+      "n002",
+      "n007"
+    ],
+    [
+      "n006",
+      "n007"
+    ],
+    [
+      "n007",
+      "n008"
+    ]
+  ],
+  "execution_contract": {
+    "guards": [
+      "resource_version",
+      "model_version"
+    ],
+    "initial_fields": {
+      "model_version": "string",
+      "question": "string",
+      "resource_version": "string"
+    },
+    "profile_cost_and_latency": "unspecified; compiler defaults zero, never measured costs",
+    "real_operator_bindings": "explicit injection required; not provided by this generator",
+    "reference_answers_available_to_service_nodes": false,
+    "resource_resolution": "Bindings resolve immutable corpus/schema/database snapshots from resource_version.",
+    "scheduler": "current GeoLeapRuntime is serial"
+  },
+  "generation": {
+    "candidate_number": 51,
+    "deduplication": "Exact directed isomorphism ignoring IDs, operator names and parameters; signature is only a bucket key.",
+    "history_node_ids": "construction-time IDs; final IDs are renumbered",
+    "limits": {
+      "max_antichain_width": 8,
+      "max_branch_fanout": 4,
+      "max_nodes": 50,
+      "max_parent_count": 4,
+      "max_retrievals_per_path": 4,
+      "max_same_operator_per_path": 2,
+      "max_sql_repairs_per_path": 2
+    },
+    "node_budget": 8,
+    "rules": [
+      {
+        "rule": "seed",
+        "variant": "reduced_din_sql"
+      },
+      {
+        "branch_roles": [
+          "direct",
+          "decomposition_guided"
+        ],
+        "new_nodes": [
+          "n004",
+          "n005",
+          "n006"
+        ],
+        "operator": "sql.generate",
+        "replaced_node": "n002",
+        "rule": "strategy_fork_explicit_join"
+      },
+      {
+        "new_nodes": [
+          "n007"
+        ],
+        "operators": [
+          "sql.prune_schema"
+        ],
+        "replaced_edge": [
+          "n001",
+          "n004"
+        ],
+        "rule": "typed_stage_insertion"
+      },
+      {
+        "new_nodes": [
+          "n008"
+        ],
+        "operators": [
+          "sql.execute"
+        ],
+        "replaced_edge": [
+          "n004",
+          "n006"
+        ],
+        "rule": "typed_stage_insertion"
+      },
+      {
+        "new_nodes": [
+          "n009"
+        ],
+        "operators": [
+          "sql.retrieve_values"
+        ],
+        "replaced_edge": [
+          "n007",
+          "n004"
+        ],
+        "rule": "typed_stage_insertion"
+      }
+    ],
+    "scenario_rng_seed": 21261114,
+    "seed": 20261111,
+    "size_stratum": "small",
+    "topology_bucket_key": "dag-wl-v1:eb511ecba421e816755f012a0551bac8e18938a4e86f2928daae875af933a054"
+  },
+  "metrics": {
+    "branched": true,
+    "cache_region_count": 13,
+    "edge_count": 8,
+    "generation_sizes": [
+      1,
+      2,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "longest_path_edges": 6,
+    "longest_path_nodes": 7,
+    "max_generation_width": 2,
+    "max_in_degree": 2,
+    "max_out_degree": 2,
+    "maximum_antichain_width": 2,
+    "node_count": 8,
+    "operator_counts": {
+      "sql.execute": 1,
+      "sql.generate": 2,
+      "sql.prune_schema": 1,
+      "sql.retrieve_values": 1,
+      "sql.schema_linking": 1,
+      "sql.select_candidate": 1,
+      "sql.self_correct": 1
+    },
+    "operator_kind_counts": {
+      "LLM": 6,
+      "Tool": 2
+    },
+    "rejected_cache_region_candidates": 1,
+    "root_count": 1,
+    "roots": [
+      "n001"
+    ],
+    "sink_count": 1,
+    "sinks": [
+      "n008"
+    ],
+    "topological_order": [
+      "n001",
+      "n002",
+      "n003",
+      "n004",
+      "n005",
+      "n006",
+      "n007",
+      "n008"
+    ],
+    "weak_component_count": 1
+  },
+  "nodes": [
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [],
+      "id": "n001",
+      "kind": "LLM",
+      "operator": "sql.schema_linking",
+      "output_field": "n001__payload",
+      "output_type": "sql.context",
+      "parameters": {
+        "role": "default"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n001"
+      ],
+      "id": "n002",
+      "kind": "LLM",
+      "operator": "sql.generate",
+      "output_field": "n002__payload",
+      "output_type": "sql.candidate",
+      "parameters": {
+        "role": "decomposition_guided"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n001"
+      ],
+      "id": "n003",
+      "kind": "LLM",
+      "operator": "sql.prune_schema",
+      "output_field": "n003__payload",
+      "output_type": "sql.context",
+      "parameters": {
+        "role": "projection_columns"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n003"
+      ],
+      "id": "n004",
+      "kind": "Tool",
+      "operator": "sql.retrieve_values",
+      "output_field": "n004__payload",
+      "output_type": "sql.context",
+      "parameters": {
+        "role": "entity_values"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n004"
+      ],
+      "id": "n005",
+      "kind": "LLM",
+      "operator": "sql.generate",
+      "output_field": "n005__payload",
+      "output_type": "sql.candidate",
+      "parameters": {
+        "role": "direct"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n005"
+      ],
+      "id": "n006",
+      "kind": "Tool",
+      "operator": "sql.execute",
+      "output_field": "n006__payload",
+      "output_type": "sql.checked",
+      "parameters": {
+        "role": "default"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n002",
+        "n006"
+      ],
+      "id": "n007",
+      "kind": "LLM",
+      "operator": "sql.select_candidate",
+      "output_field": "n007__payload",
+      "output_type": "sql.candidate",
+      "parameters": {
+        "role": "default"
+      },
+      "terminal": false
+    },
+    {
+      "contract_version": "geoleap-typed-dag-v1",
+      "dependencies": [
+        "n007"
+      ],
+      "id": "n008",
+      "kind": "LLM",
+      "operator": "sql.self_correct",
+      "output_field": "n008__payload",
+      "output_type": "sql.answer",
+      "parameters": {
+        "role": "default"
+      },
+      "terminal": true
+    }
+  ],
+  "operator_contracts": {
+    "sql.execute": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Execute candidate SQL read-only with timeout; return execution diagnostics, never gold comparisons.",
+      "input_types": [
+        "sql.candidate"
+      ],
+      "kind": "Tool",
+      "max_inputs": 1,
+      "min_inputs": 1,
+      "output_type": "sql.checked",
+      "required_data": {
+        "execution": "object",
+        "schema_context": "object",
+        "sql": "string"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "sql.generate": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Generate one candidate SQL using every parent context.",
+      "input_types": [
+        "sql.context"
+      ],
+      "kind": "LLM",
+      "max_inputs": 4,
+      "min_inputs": 1,
+      "output_type": "sql.candidate",
+      "required_data": {
+        "schema_context": "object",
+        "sql": "string"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "sql.prune_schema": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Annotate selected schema elements for a relational concern; retain immutable base schema and join keys rather than destructively removing them.",
+      "input_types": [
+        "sql.context"
+      ],
+      "kind": "LLM",
+      "max_inputs": 1,
+      "min_inputs": 1,
+      "output_type": "sql.context",
+      "required_data": {
+        "schema_context": "object"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "sql.retrieve_values": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Read database values for grounding without modifying the database.",
+      "input_types": [
+        "sql.context"
+      ],
+      "kind": "Tool",
+      "max_inputs": 1,
+      "min_inputs": 1,
+      "output_type": "sql.context",
+      "required_data": {
+        "schema_context": "object"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "sql.schema_linking": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Link the current question to a fixed database schema and evidence.",
+      "input_types": [],
+      "kind": "LLM",
+      "max_inputs": 0,
+      "min_inputs": 0,
+      "output_type": "sql.context",
+      "required_data": {
+        "schema_context": "object"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "sql.select_candidate": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Compare candidate SQL and available diagnostics without reference SQL.",
+      "input_types": [
+        "sql.candidate",
+        "sql.checked"
+      ],
+      "kind": "LLM",
+      "max_inputs": 4,
+      "min_inputs": 2,
+      "output_type": "sql.candidate",
+      "required_data": {
+        "schema_context": "object",
+        "sql": "string"
+      },
+      "side_effects": "none; resource access must be read-only"
+    },
+    "sql.self_correct": {
+      "contract_version": "geoleap-typed-dag-v1",
+      "description": "Review and correct the selected SQL against the current task and schema.",
+      "input_types": [
+        "sql.candidate",
+        "sql.checked"
+      ],
+      "kind": "LLM",
+      "max_inputs": 1,
+      "min_inputs": 1,
+      "output_type": "sql.answer",
+      "required_data": {
+        "sql": "string"
+      },
+      "side_effects": "none; resource access must be read-only"
+    }
+  },
+  "provenance": {
+    "base_method": "din_sql",
+    "benchmark_tasks_used_during_generation": false,
+    "category": "constrained_generated_derivative",
+    "note": "Shorter variants omit stages; fork/join and bounded refinements extend the cited stage organization.",
+    "original_method_reproduction": false,
+    "stage_aligned_reference": false
+  },
+  "scenario": "sql",
+  "template_id": "sql_031",
+  "validation": {
+    "fixture_execution": "pending_independent_validation",
+    "performance_evaluation": "not_run",
+    "real_service_execution": "not_run",
+    "structure_validated": true,
+    "task_quality_evaluation": "not_run"
+  },
+  "version": "geoleap-typed-dag-v1"
+}

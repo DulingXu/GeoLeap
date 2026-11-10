@@ -13,7 +13,10 @@ api_keys*.json
 *.pem
 *.key
 output/
-datasets/
+datasets/*
+!datasets/workflow_catalog_v1/
+datasets/workflow_catalog_v1/validation.json
+datasets/workflow_catalog_v1/reproducibility.json
 experiments/
 .release/
 *.local.md
